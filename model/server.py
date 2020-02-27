@@ -1,8 +1,8 @@
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 import json
 
 
-class RequestHandler(BaseHTTPRequestHandler):
+class RequestHandler(SimpleHTTPRequestHandler):
     # TODO: Remove this method in development
     # Temp method, you can test it with
     # browser address http://localhost:8001
