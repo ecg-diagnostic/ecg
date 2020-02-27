@@ -27,4 +27,4 @@ Developers:
 - [Хлевнов Олег](https://github.com/khlevnov)  
 - Чуркин Андрей
   
-## Licension
+## Licence
