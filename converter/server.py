@@ -1,5 +1,6 @@
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import cgi
+import scipy.io
 import tempfile
 
 
@@ -28,15 +29,26 @@ class RequestHandler(SimpleHTTPRequestHandler):
             signature = get_signature(file)
 
             if signature == bytes('MATLAB 5', 'utf-8'):
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(bytes('common ecg format\n', 'utf-8'))
-                return
+                try:
+                    mat = scipy.io.loadmat(file)
+                    sex = 1 if mat['ECG'][0][0][0][0] == 'Male' else 0
+                    age = mat['ECG'][0][0][1][0][0].item()
+                    signals = mat['ECG'][0][0][2]
+
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/octet-stream')
+                    self.end_headers()
+                    self.wfile.write(sex.to_bytes(1, 'little'))
+                    self.wfile.write(age.to_bytes(1, 'little'))
+                    self.wfile.write(signals.tobytes())
+                except Exception:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(bytes('wrong matlab file format\n', 'utf-8'))
             else:
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(bytes('unknown file format\n', 'utf-8'))
-                return
 
 
 def run(server_class=HTTPServer, handler_class=RequestHandler):
