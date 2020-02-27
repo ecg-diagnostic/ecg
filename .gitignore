@@ -1,3 +1,4 @@
 # user
 .idea
-converter/samples
+converter/samples/*
+!converter/samples/.gitkeep

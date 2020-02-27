@@ -12,6 +12,8 @@ def get_signature(file):
 class RequestHandler(SimpleHTTPRequestHandler):
     # To test method from current directory
     # curl -i -F "files[]=@./samples/A1957.mat" "http://localhost:8002"
+    # To save file
+    # curl -F "files[]=@./samples/A1957.mat" "http://localhost:8002" > out
     def do_POST(self):
         content_type, pdict = cgi.parse_header(self.headers['Content-type'])
         pdict = {
