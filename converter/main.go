@@ -7,16 +7,17 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
-	"os/exec"
 )
 
+var mapSignatureToParser = make(map[string]func([]byte) ([]byte, error))
+
 func main() {
-	http.HandleFunc("/", handleFiles)
+	http.HandleFunc("/", handle)
 	err := http.ListenAndServe(":8002", nil)
 	log.Fatal(err)
 }
 
-func handleFiles(w http.ResponseWriter, r *http.Request) {
+func handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
 		return
@@ -52,43 +53,21 @@ func handleFiles(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var convertedFile []byte
 		signature := string(partBody[:8])
+		parseFile, isParserFound := mapSignatureToParser[signature]
+		if !isParserFound {
+			http.Error(w, "unknown file type", http.StatusInternalServerError)
+			return
+		}
 
-		switch signature {
-		case "MATLAB 5":
-			{
-				convertedFile, err = convertMatlabFile(partBody)
-				if err != nil {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-					return
-				}
-			}
-
-		default:
-			{
-				http.Error(w, "unknown file type", http.StatusBadRequest)
-				return
-			}
+		convertedFile, err := parseFile(partBody)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.Write(convertedFile)
 		return
 	}
-}
-
-func convertMatlabFile(matlabFileContent []byte) ([]byte, error) {
-	matlabCommand := exec.Command("python3", "matlab.py")
-	stdin, err := matlabCommand.StdinPipe()
-	if err != nil {
-		return nil, err
-	}
-
-	go func() {
-		defer stdin.Close()
-		stdin.Write(matlabFileContent)
-	}()
-
-	return matlabCommand.Output()
 }
