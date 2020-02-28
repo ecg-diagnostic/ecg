@@ -3,6 +3,11 @@ package main
 import "os/exec"
 
 func parseMatlabFile(fileContent []byte) ([]byte, error) {
+	signature := string(fileContent[:8])
+	if signature != "MATLAB 5" {
+		return nil, nil
+	}
+
 	matlabCommand := exec.Command("python3", "matlab.py")
 
 	stdin, err := matlabCommand.StdinPipe()
@@ -19,5 +24,5 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 }
 
 func init() {
-	mapSignatureToParser["MATLAB 5"] = parseMatlabFile
+	parsers = append(parsers, parseMatlabFile)
 }

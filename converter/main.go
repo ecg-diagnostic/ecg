@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-var mapSignatureToParser = make(map[string]func([]byte) ([]byte, error))
+var parsers []func([]byte) ([]byte, error)
 
 func main() {
 	http.HandleFunc("/", handle)
@@ -47,27 +47,29 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		partBody, err := ioutil.ReadAll(part)
+		partContent, err := ioutil.ReadAll(part)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		signature := string(partBody[:8])
-		parseFile, isParserFound := mapSignatureToParser[signature]
-		if !isParserFound {
-			http.Error(w, "unknown file type", http.StatusInternalServerError)
+		for _, parseFile := range parsers {
+			convertedFile, err := parseFile(partContent)
+			if convertedFile == nil {
+				continue
+			}
+
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/octet-stream")
+			w.Write(convertedFile)
 			return
 		}
 
-		convertedFile, err := parseFile(partBody)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/octet-stream")
-		w.Write(convertedFile)
+		http.Error(w, "unknown file type", http.StatusInternalServerError)
 		return
 	}
 }
