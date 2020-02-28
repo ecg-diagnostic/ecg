@@ -2,3 +2,4 @@
 .idea
 converter/samples/*
 !converter/samples/.gitkeep
+!converter/samples/hl7_sample.xml

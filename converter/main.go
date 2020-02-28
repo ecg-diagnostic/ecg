@@ -55,13 +55,13 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 		for _, parseFile := range parsers {
 			convertedFile, err := parseFile(partContent)
-			if convertedFile == nil {
-				continue
-			}
-
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
+			}
+
+			if convertedFile == nil {
+				continue
 			}
 
 			w.Header().Set("Content-Type", "application/octet-stream")
@@ -69,7 +69,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Error(w, "unknown file type", http.StatusInternalServerError)
+		http.Error(w, "unknown file type", http.StatusNotFound)
 		return
 	}
 }

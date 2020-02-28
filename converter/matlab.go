@@ -1,6 +1,8 @@
 package main
 
-import "os/exec"
+import (
+	"os/exec"
+)
 
 func parseMatlabFile(fileContent []byte) ([]byte, error) {
 	signature := string(fileContent[:8])
@@ -20,7 +22,7 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 		stdin.Write(fileContent)
 	}()
 
-	return matlabCommand.Output()
+	return matlabCommand.CombinedOutput()
 }
 
 func init() {
