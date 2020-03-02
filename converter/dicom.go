@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os/exec"
 )
 
@@ -13,12 +14,18 @@ func parseDicomFile(fileContent []byte) ([]byte, error) {
 		return nil, err
 	}
 
-   go func() {
+	go func() {
 		defer stdin.Close()
 		stdin.Write(fileContent)
 	}()
 
-	return dicomCommand.CombinedOutput()
+	output, err := dicomCommand.CombinedOutput()
+
+	if err != nil {
+		return nil, errors.New(string(output))
+	}
+
+	return output, nil
 }
 
 func init() {

@@ -4,8 +4,6 @@ import pydicom
 import struct
 import re
 
-if not pydicom.misc.is_dicom:
-    assert False
 
 dataset = pydicom.dcmread(sys.stdin.buffer)
 sex = 1 if dataset.PatientSex == 'M' else 0
