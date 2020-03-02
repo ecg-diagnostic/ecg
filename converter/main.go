@@ -1,19 +1,38 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"mime"
 	"mime/multipart"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 var parsers []func([]byte) ([]byte, error)
 
+func getServerAddress() string {
+	host := flag.String("host", "localhost:", "Host for listening")
+	port := flag.Int("port", 8002, "Port for listening")
+	flag.Parse()
+
+	var strBuilder strings.Builder
+	strBuilder.WriteString(*host)
+	strBuilder.WriteString(strconv.Itoa(*port))
+	var localhostPath = strBuilder.String()
+
+	fmt.Printf("Server is listening on: %s", localhostPath)
+
+	return localhostPath
+}
+
 func main() {
 	http.HandleFunc("/", handle)
-	err := http.ListenAndServe(":8002", nil)
+	err := http.ListenAndServe(getServerAddress(), nil)
 	log.Fatal(err)
 }
 

@@ -1,13 +1,24 @@
 package main
 
+import (
+	"os/exec"
+)
+
 func parseDicomFile(fileContent []byte) ([]byte, error) {
-	signature := string(fileContent[128: 132])
-	if signature != "DICM" {
-		return nil, nil
+   dicomCommand := exec.Command("python3", "dicom.py")
+
+	stdin, err := dicomCommand.StdinPipe()
+
+	if err != nil {
+		return nil, err
 	}
 
-	// TODO: Start parse here
-	return []byte("dicom file content"), nil
+   go func() {
+		defer stdin.Close()
+		stdin.Write(fileContent)
+	}()
+
+	return dicomCommand.CombinedOutput()
 }
 
 func init() {
