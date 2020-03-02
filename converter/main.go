@@ -41,8 +41,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		part, err := multipartReader.NextPart()
 		if err == io.EOF {
 			return
-		}
-		if err != nil {
+		} else if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -65,7 +64,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 			}
 
 			w.Header().Set("Content-Type", "application/octet-stream")
-			w.Write(convertedFile)
+			_, _ = w.Write(convertedFile)
 			return
 		}
 

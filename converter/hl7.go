@@ -48,7 +48,6 @@ func parseHL7(fileContent []byte) ([]byte, error) {
 	var document Document
 	err := xml.Unmarshal(fileContent, &document)
 	if err != nil || document.XMLName.Local != "AnnotatedECG" {
-		// This is not a xml file
 		return nil, nil
 	}
 
@@ -68,6 +67,7 @@ func parseHL7(fileContent []byte) ([]byte, error) {
 				"MDC_ECG_LEAD_V5",
 				"MDC_ECG_LEAD_V6",
 			}
+
 			signals := make(map[string][]byte)
 			for _, signalName := range signalNames {
 				signals[signalName] = []byte{}
@@ -75,6 +75,7 @@ func parseHL7(fileContent []byte) ([]byte, error) {
 
 			for _, component := range series.Components {
 				code := component.Sequence.Code.Code
+
 				_, isKnownSignal := signals[code]
 				if !isKnownSignal {
 					continue

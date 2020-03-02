@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os/exec"
 )
 
@@ -19,10 +20,15 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 
 	go func() {
 		defer stdin.Close()
-		stdin.Write(fileContent)
+		_, _ = stdin.Write(fileContent)
 	}()
 
-	return matlabCommand.CombinedOutput()
+	output, err := matlabCommand.CombinedOutput()
+	if err != nil {
+		return nil, errors.New(string(output))
+	}
+
+	return output, nil
 }
 
 func init() {
