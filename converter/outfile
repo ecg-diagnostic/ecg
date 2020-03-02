@@ -1,9 +1,0 @@
-HTTP/1.1 100 Continue
-
-HTTP/1.1 500 Internal Server Error
-Content-Type: text/plain; charset=utf-8
-X-Content-Type-Options: nosniff
-Date: Mon, 02 Mar 2020 23:08:49 GMT
-Content-Length: 14
-
-exit status 1
