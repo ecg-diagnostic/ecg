@@ -3,9 +3,9 @@ import sys
 import pydicom
 import struct
 import re
+import io
 
-
-dataset = pydicom.dcmread(sys.stdin.buffer)
+dataset = pydicom.dcmread(io.BytesIO(sys.stdin.buffer.read()))
 sex = 1 if dataset.PatientSex == 'M' else 0
 age = int(re.sub("[^0-9]", "", dataset.PatientAge).strip("0"))
 

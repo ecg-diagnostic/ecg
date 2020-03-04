@@ -9,30 +9,16 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/http"
-	"strconv"
-	"strings"
 )
 
 var parsers []func([]byte) ([]byte, error)
 
-func getServerAddress() string {
-	host := flag.String("host", "localhost:", "Host for listening")
-	port := flag.Int("port", 8002, "Port for listening")
+func main() {
+	port := flag.Int("port", 8002, "port for listening")
 	flag.Parse()
 
-	var strBuilder strings.Builder
-	strBuilder.WriteString(*host)
-	strBuilder.WriteString(strconv.Itoa(*port))
-	var localhostPath = strBuilder.String()
-
-	fmt.Printf("Server is listening on: %s", localhostPath)
-
-	return localhostPath
-}
-
-func main() {
 	http.HandleFunc("/", handle)
-	err := http.ListenAndServe(getServerAddress(), nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	log.Fatal(err)
 }
 

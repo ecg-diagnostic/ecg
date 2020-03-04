@@ -6,10 +6,14 @@ import (
 )
 
 func parseDicomFile(fileContent []byte) ([]byte, error) {
-   dicomCommand := exec.Command("python3", "dicom.py")
+	signature := string(fileContent[128:132])
+	if signature != "DICM" {
+		return nil, nil
+	}
+
+	dicomCommand := exec.Command("python3", "dicom.py")
 
 	stdin, err := dicomCommand.StdinPipe()
-
 	if err != nil {
 		return nil, err
 	}
@@ -20,7 +24,6 @@ func parseDicomFile(fileContent []byte) ([]byte, error) {
 	}()
 
 	output, err := dicomCommand.CombinedOutput()
-
 	if err != nil {
 		return nil, errors.New(string(output))
 	}
