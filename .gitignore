@@ -3,3 +3,4 @@
 converter/samples/*
 !converter/samples/.gitkeep
 !converter/samples/hl7_sample.xml
+!converter/samples/dicom_sample.dcm
