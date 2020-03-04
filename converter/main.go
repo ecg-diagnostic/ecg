@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -12,8 +14,11 @@ import (
 var parsers []func([]byte) ([]byte, error)
 
 func main() {
+	port := flag.Int("port", 8002, "port for listening")
+	flag.Parse()
+
 	http.HandleFunc("/", handle)
-	err := http.ListenAndServe(":8002", nil)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	log.Fatal(err)
 }
 
