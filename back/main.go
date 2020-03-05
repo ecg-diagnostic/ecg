@@ -4,21 +4,19 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"io"
+	"github.com/google/uuid"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
-	"mime"
 	"mime/multipart"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
 )
 
 var (
 	converterPort *int
-	store         Store
+	store         = Store{tokenToEntry: make(map[Token]Entry)}
 )
 
 func main() {
@@ -39,13 +37,7 @@ func main() {
 func handleGet(w http.ResponseWriter, r *http.Request) {
 	token, ok := mux.Vars(r)["token"]
 	if !ok {
-		http.Error(w, "empty token", http.StatusBadRequest)
-		return
-	}
-
-	preprocessParams, err := parsePreprocessParams(r)
-	if err != nil {
-		http.Error(w, "invalid query params", http.StatusBadRequest)
+		http.Error(w, "empty token", http.StatusNotFound)
 		return
 	}
 
@@ -58,114 +50,104 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	preprocessParams, err := parsePreprocessParams(r)
+	if err != nil {
+		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+
 	signals := preprocess(entry.Signals, preprocessParams)
 
-	w.Header().Set("Content-Type", "application/octet-stream")
 	_, _ = w.Write(signals)
 }
 
-func handleProcess(w http.ResponseWriter, r *http.Request) {
-	//
-}
-
 func handleUpload(w http.ResponseWriter, r *http.Request) {
-	contentType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	err := r.ParseMultipartForm(1_000_000)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if contentType != "multipart/form-data" {
-		http.Error(w, http.ErrNotMultipart.Error(), http.StatusBadRequest)
-		return
+	var converterRequestBody = new(bytes.Buffer)
+	var converterWriter = multipart.NewWriter(converterRequestBody)
+
+	for _, fileHeader := range r.MultipartForm.File["files[]"] {
+		partWriter, err := converterWriter.CreatePart(fileHeader.Header)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		file, _ := fileHeader.Open()
+		fileContent, _ := ioutil.ReadAll(file)
+		_, _ = partWriter.Write(fileContent)
 	}
 
-	var multipartReader = multipart.NewReader(r.Body, params["boundary"])
-	defer r.Body.Close()
-
-	var entry = Entry{}
-	var converterRequest = new(bytes.Buffer)
-
-	var converterWriter = multipart.NewWriter(converterRequest)
-	_ = converterWriter.SetBoundary(params["boundary"])
-
-	for {
-		part, err := multipartReader.NextPart()
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		_, params, err := mime.ParseMediaType(part.Header.Get("Content-Disposition"))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		partContent, err := ioutil.ReadAll(part)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		switch params["name"] {
-		case "sex":
-			sex, err := strconv.Atoi(string(partContent))
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			entry.Sex = Sex(sex)
-
-		case "age":
-			age, err := strconv.Atoi(string(partContent))
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			entry.Age = Age(age)
-
-		case "files[]":
-			partWriter, err := converterWriter.CreatePart(part.Header)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			_, _ = partWriter.Write(partContent)
-
-		default:
-			http.Error(w, "unknown field name", http.StatusBadRequest)
-			return
-		}
-	}
-
-	converterWriter.Close()
+	_ = converterWriter.Close()
 
 	var converterUrl = fmt.Sprintf("http://localhost:%d", *converterPort)
-	resp, err := http.Post(converterUrl, r.Header.Get("Content-Type"), converterRequest)
-	defer resp.Body.Close()
+	var contentType = converterWriter.FormDataContentType()
+
+	converterResponse, err := http.Post(converterUrl, contentType, converterRequestBody)
+	defer converterResponse.Body.Close()
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if resp.StatusCode != 200 {
+	if converterResponse.StatusCode != http.StatusOK {
 		http.Error(w, "invalid file format", http.StatusBadRequest)
 		return
 	}
 
-	// responseBody, err := ioutil.ReadAll(resp.Body)
-	// defer resp.Body.Close()
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusBadRequest)
-	// 	return
-	// }
-	//
-	// signals := preprocess(entry.Signals, preprocessParams{})
+	converterResponseBody, err := ioutil.ReadAll(converterResponse.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
-	w.Header().Set("Content-Type", "application/octet-stream")
-	fmt.Fprintf(w, "hello from backend")
-	// _, _ = w.Write(signals)
+	var entry = Entry{
+		Sex: Sex(resolveEntryField(converterResponseBody[:1][0], r.Form.Get("sex"))),
+		Age: Age(resolveEntryField(converterResponseBody[1:2][0], r.Form.Get("age"))),
+		Signals: converterResponseBody[2:],
+	}
+
+	var token = Token(r.Form.Get("token"))
+
+	store.Lock()
+	if len(token) > 0 {
+		delete(store.tokenToEntry, token)
+	} else {
+		token = Token(uuid.New().String())
+	}
+	store.tokenToEntry[token] = entry
+	store.Unlock()
+
+	preprocessParams, err := parsePreprocessParams(r)
+	if err != nil {
+		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+
+	var signals = preprocess(entry.Signals, preprocessParams)
+
+	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	_, _ = w.Write(signals)
+}
+
+func resolveEntryField(fromConverter byte, fromForm string) byte {
+	if fromConverter != byte(0xff) {
+		return fromConverter
+	}
+
+	if i, err := strconv.Atoi(fromForm); err == nil {
+		return byte(i)
+	}
+
+	return fromConverter
+}
+
+func handleProcess(w http.ResponseWriter, r *http.Request) {
+	// Get entry by request token, preprocess it without downsample and send it to the model
+	// After that return model predictions to the front
 }

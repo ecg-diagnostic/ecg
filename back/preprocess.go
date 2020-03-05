@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -29,27 +28,19 @@ func preprocess(rawSignals []byte, params preprocessParams) []byte {
 }
 
 func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
+	r.ParseForm()
 	var params = preprocessParams{}
 
-	p := r.URL.Query().Get("downsampleFactor")
-	if p, err := strconv.Atoi(p); err == nil {
-		params.lowerFrequencyBound = p
-	} else {
-		return params, errors.New("invalid downsample factor in query")
+	if p, err := strconv.Atoi(r.Form.Get("downsampleFactor")); err == nil {
+		params.downsampleFactor = p
 	}
 
-	p = r.URL.Query().Get("lowerFrequencyBound")
-	if p, err := strconv.Atoi(p); err == nil {
-		params.lowerFrequencyBound = p
-	} else {
-		return params, errors.New("invalid lower frequency bound in query")
+	if p, err := strconv.Atoi(r.Form.Get("lowerFrequencyBound")); err == nil {
+		params.downsampleFactor = p
 	}
 
-	p = r.URL.Query().Get("upperFrequencyBound")
-	if p, err := strconv.Atoi(p); err == nil {
-		params.upperFrequencyBound = p
-	} else {
-		return params, errors.New("invalid upper frequency bound in query")
+	if p, err := strconv.Atoi(r.Form.Get("upperFrequencyBound")); err == nil {
+		params.downsampleFactor = p
 	}
 
 	return params, nil
