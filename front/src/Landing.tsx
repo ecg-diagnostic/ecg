@@ -18,6 +18,11 @@ function Landing() {
         const formData = new FormData()
         formData.append('sex', sex.toString())
         formData.append('age', age.toString())
+
+        formData.append('downsampleFactor', '3')
+        formData.append('lowerFrequencyBound', '7')
+        formData.append('upperFrequencyBound', '11')
+
         files.forEach(file => {
             formData.append('files[]', file)
         })

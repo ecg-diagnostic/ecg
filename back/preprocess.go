@@ -1,47 +1,63 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"os/exec"
 	"strconv"
 )
 
-func preprocess(rawSignals []byte, params preprocessParams) []byte {
-	// BIND TO THE PYTHON SCRIPT
-	fmt.Printf("preprocess params: %v\n", params)
+func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
+	preprocessCommand := exec.Command("python3", "preprocess.py")
+	preprocessCommand.Env = append(
+		preprocessCommand.Env,
+		fmt.Sprintf("downsampleFactor=%d", p.downsampleFactor),
+	)
+	preprocessCommand.Env = append(
+		preprocessCommand.Env,
+		fmt.Sprintf("lowerFrequencyBound=%d", p.lowerFrequencyBound),
+	)
+	preprocessCommand.Env = append(
+		preprocessCommand.Env,
+		fmt.Sprintf("upperFrequencyBound=%d", p.upperFrequencyBound),
+	)
 
-	var pointsPerSignal = len(rawSignals) / 12
-	var signals []byte
-
-	for i := 0; i < 12; i++ {
-		for j := 0; j < pointsPerSignal; j++ {
-			// Here is a problem, use params.downsampleFactor instead
-			if j%2 == 0 {
-				continue
-			}
-
-			signals = append(signals, rawSignals[i*5000+j])
-		}
+	stdin, err := preprocessCommand.StdinPipe()
+	if err != nil {
+		return nil, err
 	}
 
-	return signals
+	go func() {
+		defer stdin.Close()
+		_, _ = stdin.Write(rawSignals)
+	}()
+
+	output, err := preprocessCommand.CombinedOutput()
+	if err != nil {
+		return nil, errors.New(string(output))
+	}
+
+	return output, nil
 }
 
 func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
-	r.ParseForm()
 	var params = preprocessParams{}
 
-	if p, err := strconv.Atoi(r.Form.Get("downsampleFactor")); err == nil {
-		params.downsampleFactor = p
+	err := r.ParseForm()
+	if err != nil {
+		return params, err
 	}
 
-	if p, err := strconv.Atoi(r.Form.Get("lowerFrequencyBound")); err == nil {
-		params.downsampleFactor = p
-	}
-
-	if p, err := strconv.Atoi(r.Form.Get("upperFrequencyBound")); err == nil {
-		params.downsampleFactor = p
-	}
+	parseParam(&params.downsampleFactor, r, "downsampleFactor")
+	parseParam(&params.lowerFrequencyBound, r, "lowerFrequencyBound")
+	parseParam(&params.upperFrequencyBound, r, "upperFrequencyBound")
 
 	return params, nil
+}
+
+func parseParam(p *int, r *http.Request, key string) {
+	if param, err := strconv.Atoi(r.Form.Get(key)); err == nil {
+		*p = param
+	}
 }

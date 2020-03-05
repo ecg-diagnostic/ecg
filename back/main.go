@@ -56,7 +56,11 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signals := preprocess(entry.Signals, preprocessParams)
+	signals, err := preprocess(entry.Signals, preprocessParams)
+	if err != nil {
+		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
 
 	_, _ = w.Write(signals)
 }
@@ -129,7 +133,11 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var signals = preprocess(entry.Signals, preprocessParams)
+	signals, err := preprocess(entry.Signals, preprocessParams)
+	if err != nil {
+		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	_, _ = w.Write(signals)
