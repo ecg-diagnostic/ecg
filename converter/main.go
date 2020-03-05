@@ -35,7 +35,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if contentType != "multipart/form-data" {
-		http.Error(w, "invalid content-type", http.StatusBadRequest)
+		http.Error(w, http.ErrNotMultipart.Error(), http.StatusBadRequest)
 		return
 	}
 
