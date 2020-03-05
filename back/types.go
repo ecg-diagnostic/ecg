@@ -4,8 +4,8 @@ import "sync"
 
 type Token string
 
-type Sex uint8
-type Age uint8
+type Sex int
+type Age int
 type Signals []byte
 
 type Entry struct {
