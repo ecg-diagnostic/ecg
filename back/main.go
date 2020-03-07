@@ -23,7 +23,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{token}", handleGet).Methods("GET")
 	r.HandleFunc("/", handleUpload).Methods("POST")
-	r.HandleFunc("/process", handleProcess).Methods("POST")
+	r.HandleFunc("/process/{token}", handleProcess).Methods("POST")
 	http.Handle("/", handlers.CORS()(r))
 
 	port := flag.Int("port", 8001, "port for listening")
@@ -62,6 +62,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/octet-stream")
 	_, _ = w.Write(signals)
 }
 
@@ -139,6 +140,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/octet-stream")
 	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	_, _ = w.Write(signals)
 }
