@@ -1,30 +1,26 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import {
     DefaultButton,
     Panel,
     PrimaryButton,
     Stack,
-} from 'office-ui-fabric-react';
-import { useConstCallback } from '@uifabric/react-hooks';
+} from 'office-ui-fabric-react'
+import { useConstCallback } from '@uifabric/react-hooks'
 import { Chart } from './Chart'
 import './Signals.css'
-import {Settings} from "../../Settings";
+import { Settings } from '../Settings'
 
-const Signals: React.FunctionComponent = () => {
+const PlotScreen: React.FunctionComponent = () => {
     const [isFilterOpen, setFilterOpen] = useState<boolean>(false)
 
-    const openPanel = useConstCallback(() => setFilterOpen(true));
-    const dismissPanel = useConstCallback(() => setFilterOpen(false));
+    const openPanel = useConstCallback(() => setFilterOpen(true))
+    const dismissPanel = useConstCallback(() => setFilterOpen(false))
     const onRenderFooterContent = useConstCallback(() => (
-        <Stack horizontal tokens={{childrenGap: 6}}>
-            <DefaultButton onClick={dismissPanel}>
-                Cancel
-            </DefaultButton>
-            <PrimaryButton onClick={dismissPanel}>
-                Apply
-            </PrimaryButton>
+        <Stack horizontal tokens={{ childrenGap: 6 }}>
+            <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
+            <PrimaryButton onClick={dismissPanel}>Apply</PrimaryButton>
         </Stack>
-    ));
+    ))
 
     return (
         <div className="signals">
@@ -62,4 +58,4 @@ const Signals: React.FunctionComponent = () => {
     )
 }
 
-export { Signals }
+export { PlotScreen }

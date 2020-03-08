@@ -1,6 +1,6 @@
 import React from 'react';
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons';
-import { Signals } from './Signals';
+import { PlotScreen } from './PlotScreen';
 import './global.css'
 
 initializeIcons()
@@ -8,7 +8,7 @@ initializeIcons()
 function App() {
     return (
         <>
-            <Signals />
+            <PlotScreen />
         </>
     );
 }

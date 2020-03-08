@@ -1,0 +1,22 @@
+.signals {
+    overflow: hidden;
+    position: relative;
+}
+
+.signals__chart {
+    padding-bottom: 64px;
+}
+
+.signals__controls {
+    background-color: #fff;
+    bottom: 0;
+    left: 0;
+    padding: 16px 24px;
+    position: fixed;
+    width: 100%;
+}
+
+.signals__buttons {
+    display: flex;
+    justify-content: center;
+}
