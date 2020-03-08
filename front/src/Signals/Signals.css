@@ -1,0 +1,50 @@
+.signals {
+    position: relative;
+}
+
+.signals__chart {
+    padding-bottom: 56px;
+}
+
+.signals_filter .signals__chart {
+    padding-bottom: 143px;
+}
+
+.signals__filter {
+    margin-bottom: 16px;
+}
+
+.signals__controls {
+    background-color: #fff;
+    bottom: 0;
+    height: 56px;
+    left: 0;
+    padding: 12px;
+    position: fixed;
+    width: 100%;
+}
+
+.signals_filter .signals__controls {
+    height: 144px;
+}
+
+.signals__buttons {
+    display: flex;
+    justify-content: center;
+}
+
+.signals__frequency-slider {
+    flex-grow: 1;
+}
+
+.signals__frequency-slider .ms-Slider-container {
+    display: block;
+}
+
+.signals__frequency-slider .ms-Slider-slideBox {
+    padding: 0;
+}
+
+.signals__frequency-slider .ms-Slider-slideBox {
+    padding: 0;
+}
