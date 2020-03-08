@@ -2,13 +2,11 @@ export type Hz = number
 export type Token = string
 
 export enum FloatPrecision {
-    Float16 = 16,
     Float32 = 32,
     Float64 = 64,
 }
 
 export const FLOAT_PRECISIONS: Array<FloatPrecision> = [
-    FloatPrecision.Float16,
     FloatPrecision.Float32,
     FloatPrecision.Float64,
 ]

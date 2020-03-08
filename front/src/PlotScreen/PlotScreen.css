@@ -1,0 +1,15 @@
+.plot-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.plot-screen__plot {
+    flex-grow: 1;
+    height: 100%;
+}
+
+.plot-screen__buttons {
+    background-color: #fff;
+    padding: 16px 24px;
+}

@@ -6,9 +6,9 @@ import {
     Stack,
 } from 'office-ui-fabric-react'
 import { useConstCallback } from '@uifabric/react-hooks'
-import { Chart } from './Chart'
-import './Signals.css'
+import './PlotScreen.css'
 import { Settings } from '../Settings'
+import { Plot } from '../Plot'
 
 const PlotScreen: React.FunctionComponent = () => {
     const [isFilterOpen, setFilterOpen] = useState<boolean>(false)
@@ -23,9 +23,23 @@ const PlotScreen: React.FunctionComponent = () => {
     ))
 
     return (
-        <div className="signals">
-            <div className="signals__chart">
-                <Chart />
+        <div className="plot-screen">
+            <div className="plot-screen__plot">
+                <Plot />
+            </div>
+
+            <div className="plot-screen__buttons">
+                <Stack horizontal tokens={{ childrenGap: 6 }}>
+                    <DefaultButton
+                        disabled={isFilterOpen}
+                        onClick={() => setFilterOpen(true)}
+                    >
+                        Settings
+                    </DefaultButton>
+                    <PrimaryButton disabled={isFilterOpen}>
+                        Predict
+                    </PrimaryButton>
+                </Stack>
             </div>
 
             <Panel
@@ -39,21 +53,6 @@ const PlotScreen: React.FunctionComponent = () => {
             >
                 <Settings />
             </Panel>
-
-            <div className="signals__controls">
-                <div className="signals__buttons">
-                    <Stack horizontal tokens={{ childrenGap: 6 }}>
-                        <DefaultButton
-                            onClick={() => setFilterOpen(!isFilterOpen)}
-                        >
-                            Settings
-                        </DefaultButton>
-                        <PrimaryButton disabled={isFilterOpen}>
-                            {'Predict'}
-                        </PrimaryButton>
-                    </Stack>
-                </div>
-            </div>
         </div>
     )
 }
