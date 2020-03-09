@@ -14,7 +14,7 @@ import {
 const defaultSettingsState: Settings = {
     floatPrecision: FloatPrecision.Float32,
     lowerFrequencyBound: 5,
-    sampleRate: 400,
+    sampleRate: 100,
     upperFrequencyBound: 180,
 }
 

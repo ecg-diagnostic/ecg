@@ -1,8 +1,7 @@
 import * as d3 from 'd3'
 
-function createSvgGrid(pixelsInGridCell: number) {
+function createGraphPaperGrid(size: number) {
     const COLOR = '#ffa500'
-    const size = pixelsInGridCell
 
     const dotsGridElement = document.createElement('svg')
     dotsGridElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
@@ -52,4 +51,8 @@ function createSvgGrid(pixelsInGridCell: number) {
     return URL.createObjectURL(blob)
 }
 
-export { createSvgGrid }
+function removeGraphPaperGrid(url: string) {
+    URL.revokeObjectURL(url)
+}
+
+export { createGraphPaperGrid, removeGraphPaperGrid }

@@ -12,11 +12,15 @@ func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
 	preprocessCommand := exec.Command("python3", "preprocess.py")
 	preprocessCommand.Env = append(
 		preprocessCommand.Env,
-		fmt.Sprintf("downsampleFactor=%d", p.downsampleFactor),
+		fmt.Sprintf("floatPrecision=%d", p.floatPrecision),
 	)
 	preprocessCommand.Env = append(
 		preprocessCommand.Env,
 		fmt.Sprintf("lowerFrequencyBound=%d", p.lowerFrequencyBound),
+	)
+	preprocessCommand.Env = append(
+		preprocessCommand.Env,
+		fmt.Sprintf("sampleRate=%d", p.sampleRate),
 	)
 	preprocessCommand.Env = append(
 		preprocessCommand.Env,
@@ -49,8 +53,9 @@ func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
 		return params, err
 	}
 
-	parseParam(&params.downsampleFactor, r, "downsampleFactor")
+	parseParam(&params.floatPrecision, r, "floatPrecision")
 	parseParam(&params.lowerFrequencyBound, r, "lowerFrequencyBound")
+	parseParam(&params.sampleRate, r, "sampleRate")
 	parseParam(&params.upperFrequencyBound, r, "upperFrequencyBound")
 
 	return params, nil

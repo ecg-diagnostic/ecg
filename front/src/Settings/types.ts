@@ -18,8 +18,8 @@ export type Settings = {
 }
 
 export enum Speed {
-    _25mmPerSec,
-    _50mmPerSec,
+    _25mmPerSec = 25,
+    _50mmPerSec = 50,
 }
 
 export enum Lead {

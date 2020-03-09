@@ -1,40 +1,55 @@
 import { createEvent } from 'effector'
 import { Token } from './types'
-import { LEADS } from '../Settings/types'
+import { FloatPrecision, LEADS } from '../Settings/types'
 import { settingsStore } from '../Settings/model'
 import { setSignals } from '../Plot/events'
 
-const setToken = createEvent<Token>()
+function fetchSignals(token: Token | null) {
+    if (token === null) {
+        return
+    }
 
-setToken.watch(token => {
     const settings = settingsStore.getState()
-    console.log('settings', settings)
+    const query = new URLSearchParams(Object(settings)).toString()
+    const url = `http://localhost:8001/${token}?${query}`
 
-    fetch(`http://localhost:8001/${token}`, {
-        method: 'GET',
-    })
-        .then(response => response.blob())
-        .then(blob => {
-            console.log('blob.size', blob.size)
-            return new Response(blob)
+    fetch(url)
+        .then(response => {
+            if (response.ok) {
+                return response.blob()
+            }
+            throw new Error(response.statusText)
         })
+        .then(blob => new Response(blob))
         .then(response => response.arrayBuffer())
-        // .then(arrayBuffer => new Float64Array(arrayBuffer))
-        // .then(concatenatedSignals => {
-        //     const signalPointsCount = concatenatedSignals.length / LEADS.length
-        //     const signals = LEADS.map(i => {
-        //         const slice = concatenatedSignals.slice(
-        //             i * signalPointsCount,
-        //             i * signalPointsCount + signalPointsCount,
-        //         )
-        //         return new Float64Array(slice)
-        //     })
-        //
-        //     console.log('signals', signals)
-        //     setSignals(signals)
-        // })
-})
+        .then(arrayBuffer => {
+            switch (settings.floatPrecision) {
+                case FloatPrecision.Float32: {
+                    const signals = new Float32Array(arrayBuffer)
+                    const sliceLength = signals.length / LEADS.length
+                    return LEADS.map(i =>
+                        signals.subarray(
+                            i * sliceLength,
+                            i * sliceLength + sliceLength,
+                        ),
+                    )
+                }
+                case FloatPrecision.Float64: {
+                    const signals = new Float64Array(arrayBuffer)
+                    const sliceLength = signals.length / LEADS.length
+                    return LEADS.map(i =>
+                        signals.subarray(
+                            i * sliceLength,
+                            i * sliceLength + sliceLength,
+                        ),
+                    )
+                }
+            }
+        })
+        .then(signals => setSignals(signals))
+}
 
-setToken('a89a78f5-badf-4dfb-8364-b59650eba538')
+const setToken = createEvent<Token>()
+setToken.watch(fetchSignals)
 
-export { setToken }
+export { fetchSignals, setToken }

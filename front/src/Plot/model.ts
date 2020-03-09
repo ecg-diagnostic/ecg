@@ -1,25 +1,27 @@
 import { createStore } from 'effector'
 import { Signals } from './types'
-import { setSvgGridUrl } from './events'
-import { createSvgGrid } from './createSvgGrid'
+import { setGraphPaperGridUrl, setSignals } from './events'
+import { createGraphPaperGrid } from './graphPaperGrid'
 import { defaultFrontendSettingsState } from '../Settings/model'
 
 export type PlotState = {
-    svgGridUrl: string,
-    signals: Signals,
+    graphPaperGridUrl: string
+    signals: Signals
 }
 
 const defaultPlotState: PlotState = {
-    svgGridUrl: createSvgGrid(defaultFrontendSettingsState.scale),
+    graphPaperGridUrl: createGraphPaperGrid(defaultFrontendSettingsState.scale),
     signals: Array(12).fill(new Float32Array()),
 }
 
-const plotStore = createStore<PlotState>(defaultPlotState).on(
-    setSvgGridUrl,
-    (state, svgGridUrl) => ({
+const plotStore = createStore<PlotState>(defaultPlotState)
+    .on(setGraphPaperGridUrl, (state, svgGridUrl) => ({
         ...state,
-        svgGridUrl,
-    }),
-)
+        graphPaperGridUrl: svgGridUrl,
+    }))
+    .on(setSignals, (state, signals) => ({
+        ...state,
+        signals,
+    }))
 
 export { plotStore }

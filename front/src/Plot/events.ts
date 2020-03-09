@@ -1,14 +1,15 @@
 import { createEvent } from 'effector'
-import { createSvgGrid } from './createSvgGrid'
+import { createGraphPaperGrid, removeGraphPaperGrid } from './graphPaperGrid'
 import { setScale } from '../Settings/events'
 import { Signals } from './types'
 
 const setSignals = createEvent<Signals>()
-const setSvgGridUrl = createEvent<string>()
+const setGraphPaperGridUrl = createEvent<string>()
 
 setScale.watch(scale => {
-    const svgGridUrl = createSvgGrid(scale)
-    setSvgGridUrl(svgGridUrl)
+    // removeGraphPaperGrid for previous url
+    const url = createGraphPaperGrid(scale)
+    setGraphPaperGridUrl(url)
 })
 
-export { setSignals, setSvgGridUrl }
+export { setSignals, setGraphPaperGridUrl }

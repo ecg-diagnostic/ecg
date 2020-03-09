@@ -1,6 +1,6 @@
-import React from 'react'
+import React, {useCallback, useState} from 'react'
 import { useStore } from 'effector-react'
-import { DefaultButton, Label, Slider, Stack } from 'office-ui-fabric-react'
+import { DefaultButton, Label, Slider, Stack, Toggle } from 'office-ui-fabric-react'
 import './Settings.css'
 import {
     resetSettings,
@@ -23,6 +23,8 @@ function Settings() {
         sampleRate,
         upperFrequencyBound,
     } = useStore(settingsStore)
+
+    const [isDeveloperSettings, setDeveloperSettings] = useState<boolean>(false)
 
     return (
         <Stack tokens={{ childrenGap: 12 }} className="settings">
@@ -78,31 +80,6 @@ function Settings() {
                 ))}
             </Stack>
 
-            <Slider
-                value={sampleRate}
-                label="Sample rate"
-                max={500}
-                min={100}
-                onChange={setSampleRate}
-                step={10}
-                valueFormat={(value: number) => `${value} Hz`}
-            />
-
-            <Stack>
-                <Label>Frontend data transfer float precision</Label>
-                <Stack horizontal className="settings__switches">
-                    {FLOAT_PRECISIONS.map(p => (
-                        <DefaultButton
-                            checked={floatPrecision === p}
-                            key={p}
-                            onClick={() => setFloatPrecision(p)}
-                        >
-                            {FloatPrecision[p]}
-                        </DefaultButton>
-                    ))}
-                </Stack>
-            </Stack>
-
             <Stack>
                 <Slider
                     value={lowerFrequencyBound}
@@ -123,6 +100,39 @@ function Settings() {
                     valueFormat={(value: number) => `${value} Hz`}
                 />
             </Stack>
+
+            <Toggle
+                onText="Disable developer settings"
+                offText="Enable developer settings"
+                onChange={() => setDeveloperSettings(!isDeveloperSettings)}
+            />
+
+            {isDeveloperSettings && (
+                <Stack>
+                    <Slider
+                        value={sampleRate}
+                        label="Sample rate"
+                        max={500}
+                        min={100}
+                        onChange={setSampleRate}
+                        step={10}
+                        valueFormat={(value: number) => `${value} Hz`}
+                    />
+
+                    <Label>Frontend data transfer float precision</Label>
+                    <Stack horizontal className="settings__switches">
+                        {FLOAT_PRECISIONS.map(p => (
+                            <DefaultButton
+                                checked={floatPrecision === p}
+                                key={p}
+                                onClick={() => setFloatPrecision(p)}
+                            >
+                                {FloatPrecision[p]}
+                            </DefaultButton>
+                        ))}
+                    </Stack>
+                </Stack>
+            )}
 
             <DefaultButton onClick={() => resetSettings()}>
                 Reset to defaults

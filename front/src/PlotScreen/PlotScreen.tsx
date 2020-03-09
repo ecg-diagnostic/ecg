@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useStore } from 'effector-react'
 import {
     DefaultButton,
     Panel,
@@ -9,18 +10,32 @@ import { useConstCallback } from '@uifabric/react-hooks'
 import './PlotScreen.css'
 import { Settings } from '../Settings'
 import { Plot } from '../Plot'
+import { tokenStore } from '../App/model'
+import { fetchSignals } from '../App/events'
+import { Redirect } from 'react-router-dom'
 
 const PlotScreen: React.FunctionComponent = () => {
+    const token = useStore(tokenStore)
     const [isFilterOpen, setFilterOpen] = useState<boolean>(false)
 
     const openPanel = useConstCallback(() => setFilterOpen(true))
     const dismissPanel = useConstCallback(() => setFilterOpen(false))
+
     const onRenderFooterContent = useConstCallback(() => (
         <Stack horizontal tokens={{ childrenGap: 6 }}>
             <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
-            <PrimaryButton onClick={dismissPanel}>Apply</PrimaryButton>
+            <PrimaryButton onClick={() => {
+                fetchSignals(token)
+                dismissPanel()
+            }}>
+                Apply
+            </PrimaryButton>
         </Stack>
     ))
+
+    if (!token) {
+        return <Redirect to="/" />
+    }
 
     return (
         <div className="plot-screen">
@@ -30,10 +45,7 @@ const PlotScreen: React.FunctionComponent = () => {
 
             <div className="plot-screen__buttons">
                 <Stack horizontal tokens={{ childrenGap: 6 }}>
-                    <DefaultButton
-                        disabled={isFilterOpen}
-                        onClick={openPanel}
-                    >
+                    <DefaultButton disabled={isFilterOpen} onClick={openPanel}>
                         Settings
                     </DefaultButton>
                     <PrimaryButton disabled={isFilterOpen}>
