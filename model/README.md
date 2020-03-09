@@ -1,5 +1,61 @@
-## Model component
+# Нейросетевой классификатор
 
-We should write short description about this component, but lets do it later.  
-  
-Now just run it with `python3 server.py` or `python server.py` and lets do this component working.
+Данный компонент отвечает за автоматическую идентификацию нарушений ритма/морфологии в ЭКГ с 12 отведениями. Для получения предсказания, нужно воспользоваться предлагаемым API.
+
+### Описание модели
+Модель представляет собой изолированное приложение, которое слушает 8001 порт (http://localhost:8001/predict). На вход оно ожидает экг во внутреннем представлении приложения. Результатом предсказания вляется json следующего вида:
+
+```json
+{
+  "prediction": [
+    0.00428305,
+    0.00085784,
+    0.00085017,
+    0.00508056,
+    0.74756872,
+    0.00096200,
+    0.00058992,
+    0.00474171,
+    0.23506587
+  ]
+}
+```
+Порядковый номер элемента в массиве `prediction` кодирует диагноз согласно таблице ниже, а значение элемента (от 0 до 1) представляет собой уверенность в этом диагнозе.
+
+| Номер | Диагноз                                     |
+|:-----:|:-------------------------------------------:|
+| 1     | Normal                                      |
+| 2     | Atrial fibrillation (AF)                    |
+| 3     | First-degree atrioventricular block (I-AVB) |
+| 4     | Left bundle branch block (LBBB)             |
+| 5     | Right bundle branch block (RBBB)            |
+| 6     | Premature atrial contraction (PAC)          |
+| 7     | Premature ventricular contraction (PVC)     |
+| 8     | ST-segment depression (STD)                 |
+| 9     | ST-segment elevated (STE)                   |
+
+
+
+### Как пользоваться компонентой
+Для того, чтобы поднять сервер, предоставляющий API к нейросетевому классификатору, нужно из папки /ecg/model воспользоваться следующей командой
+```bash
+$ uvicorn api.server:app --reload --host localhost --port 8001
+```
+При возникновении вопросов можно обратиться к [документации uvicorn](https://www.uvicorn.org/deployment/).
+
+Опробовать API и получить предсказание можно одним из двух способов:
+
+1. **Через веб-интерфейс.**
+Для этого нужно перейти на http://localhost:8001/docs. Далее следует нажать на кнопку POST, потом на кнопку Try it out.
+В поле ecg_bin нужно выбрать файл во внутреннем формате приложения и нажать Execute.
+
+2. **Через Curl.** Для этого можно воспользоваться следующей командой
+
+```bash
+$ curl -X POST "http://localhost:8001/predict" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "ecg_bin=@ecg.bin;type=application/octet-stream"
+```
+
+
+
+
+
