@@ -1,6 +1,7 @@
 # user
 .idea
 converter/samples/*
+front/node_modules/*
 !converter/samples/.gitkeep
 !converter/samples/hl7_sample.xml
 !converter/samples/dicom_sample.dcm

@@ -1,0 +1,12 @@
+version: "3.2"
+services:
+  front:
+    image: lashby8/ecg-fe:latest
+    network_mode: host
+    ports:
+      - "4200:4200"
+  converter:
+    image: lashby8/ecg-converter:latest
+    ports:
+      - "8002:8002"
+
