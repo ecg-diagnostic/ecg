@@ -24,3 +24,7 @@ type preprocessParams struct {
 	lowerFrequencyBound int
 	upperFrequencyBound int
 }
+
+type TokenResponse struct {
+	Token Token `json:"token"`
+}

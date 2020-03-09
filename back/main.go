@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
@@ -112,9 +113,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var entry = Entry{
-		Sex: Sex(resolveEntryField(converterResponseBody[:1][0], r.Form.Get("sex"))),
-		Age: Age(resolveEntryField(converterResponseBody[1:2][0], r.Form.Get("age"))),
-		Signals: converterResponseBody[2:],
+		Signals: converterResponseBody,
 	}
 
 	var token = Token(r.Form.Get("token"))
@@ -128,21 +127,10 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	store.tokenToEntry[token] = entry
 	store.Unlock()
 
-	preprocessParams, err := parsePreprocessParams(r)
-	if err != nil {
-		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
+	response, _ := json.Marshal(TokenResponse{ Token: token })
 
-	signals, err := preprocess(entry.Signals, preprocessParams)
-	if err != nil {
-		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	_, _ = w.Write(signals)
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(response)
 }
 
 func resolveEntryField(fromConverter byte, fromForm string) byte {

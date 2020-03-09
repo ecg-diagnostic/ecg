@@ -7,7 +7,7 @@ import {
     setFloatPrecision,
     setLowerFrequencyBound,
     setSampleRate,
-    setPixelsInGridCell,
+    setScale,
     setSpeed,
     setUpperFrequencyBound,
     toggleVisibleLead,
@@ -16,7 +16,7 @@ import { FLOAT_PRECISIONS, FloatPrecision, Lead, LEADS, Speed } from './types'
 import { frontendSettingsStore, settingsStore } from './model'
 
 function Settings() {
-    const { pixelsInGridCell, speed, visibleLeads } = useStore(frontendSettingsStore)
+    const { scale, speed, visibleLeads } = useStore(frontendSettingsStore)
     const {
         floatPrecision,
         lowerFrequencyBound,
@@ -27,13 +27,13 @@ function Settings() {
     return (
         <Stack tokens={{ childrenGap: 12 }} className="settings">
             <Slider
-                value={pixelsInGridCell}
-                label="Scale, pixels count in 10mm / 2 grid cells"
+                value={scale}
+                label="Zoom"
                 max={30}
-                min={15}
-                onChange={setPixelsInGridCell}
+                min={10}
+                onChange={setScale}
                 step={1}
-                valueFormat={(value: number) => `${value * 2} px`}
+                valueFormat={(value: number) => `${value * 2} px/cm`}
             />
 
             <Stack>

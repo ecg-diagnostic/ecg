@@ -5,12 +5,12 @@ import { createSvgGrid } from './createSvgGrid'
 import { defaultFrontendSettingsState } from '../Settings/model'
 
 export type PlotState = {
-    svgGridUrl: string
-    signals: Signals
+    svgGridUrl: string,
+    signals: Signals,
 }
 
 const defaultPlotState: PlotState = {
-    svgGridUrl: createSvgGrid(defaultFrontendSettingsState.pixelsInGridCell),
+    svgGridUrl: createSvgGrid(defaultFrontendSettingsState.scale),
     signals: Array(12).fill(new Float32Array()),
 }
 

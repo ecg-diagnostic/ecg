@@ -32,7 +32,7 @@ const PlotScreen: React.FunctionComponent = () => {
                 <Stack horizontal tokens={{ childrenGap: 6 }}>
                     <DefaultButton
                         disabled={isFilterOpen}
-                        onClick={() => setFilterOpen(true)}
+                        onClick={openPanel}
                     >
                         Settings
                     </DefaultButton>
@@ -48,7 +48,7 @@ const PlotScreen: React.FunctionComponent = () => {
                 isFooterAtBottom={true}
                 isLightDismiss
                 isOpen={isFilterOpen}
-                onDismiss={() => setFilterOpen(false)}
+                onDismiss={dismissPanel}
                 onRenderFooterContent={onRenderFooterContent}
             >
                 <Settings />

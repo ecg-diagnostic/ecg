@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
+import { useHistory } from 'react-router-dom'
+import { setToken } from '../App/events'
 
 enum Sex {
     Male = 1,
@@ -11,13 +13,12 @@ function Landing() {
     const [sex, setSex] = useState<Sex>(Sex.Male)
     const [age, setAge] = useState<Age>(0)
     const [files, setFiles] = useState<Array<File>>([])
+    const history = useHistory()
 
     function handleSubmit(event: any) {
         event.preventDefault()
 
         const formData = new FormData()
-        formData.append('sex', sex.toString())
-        formData.append('age', age.toString())
 
         formData.append('downsampleFactor', '3')
         formData.append('lowerFrequencyBound', '7')
@@ -27,11 +28,24 @@ function Landing() {
             formData.append('files[]', file)
         })
 
-        fetch("http://localhost:8001", {
+        fetch('http://localhost:8001', {
             body: formData,
             method: 'POST',
             mode: 'cors',
-        }).then(response => console.log(response))
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json()
+                }
+                throw new Error(
+                    `fetch error: ${response.status} ${response.statusText}`,
+                )
+            })
+            .then(response => {
+                setToken(response.token)
+                history.push('/plot')
+            })
+            .catch(error => console.error(error))
     }
 
     function handleSexChange(event: React.FormEvent<HTMLInputElement>) {
@@ -88,18 +102,14 @@ function Landing() {
                     <div>Age</div>
                     <input
                         type="text"
-                        value={age === 0 ? "" : age}
+                        value={age === 0 ? '' : age}
                         onChange={handleAgeChange}
                     />
                 </label>
 
                 <label>
                     <div>File</div>
-                    <input
-                        type="file"
-                        multiple
-                        onChange={handleFilesChange}
-                    />
+                    <input type="file" multiple onChange={handleFilesChange} />
                 </label>
 
                 <div>

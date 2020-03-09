@@ -1,11 +1,11 @@
 import { createEvent } from 'effector'
-import { FloatPrecision, Hz, Lead, Speed, Token } from './types'
+import { FloatPrecision, Hz, Lead, Speed } from './types'
 
 const resetSettings = createEvent()
 const setFloatPrecision = createEvent<FloatPrecision>()
 const setLowerFrequencyBound = createEvent<Hz>()
 const setSampleRate = createEvent<Hz>()
-const setPixelsInGridCell = createEvent<number>()
+const setScale = createEvent<number>()
 const setSpeed = createEvent<Speed>()
 const setUpperFrequencyBound = createEvent<Hz>()
 const toggleVisibleLead = createEvent<Lead>()
@@ -15,7 +15,7 @@ export {
     setFloatPrecision,
     setLowerFrequencyBound,
     setSampleRate,
-    setPixelsInGridCell,
+    setScale,
     setSpeed,
     setUpperFrequencyBound,
     toggleVisibleLead,

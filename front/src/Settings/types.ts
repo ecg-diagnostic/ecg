@@ -1,5 +1,4 @@
 export type Hz = number
-export type Token = string
 
 export enum FloatPrecision {
     Float32 = 32,
