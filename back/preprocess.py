@@ -14,28 +14,34 @@ def butter_lowpass_filter(data, cutoff, fs, order=3):
         return data
 
 
-def to_precision(x, precision):
-    if precision == '16':
-        return x.astype(np.float16)
-    if precision == '32':
-        return x.astype(np.float32)
-    if precision == '64':
-        return x.astype(np.float64)
-
-    return x
-
-
-def apply_filter(rawSignals, rawSampleRate, sampleRate, floatPrecison, lowerFrequencyBound, upperFrequencyBound):
-    x = butter_lowpass_filter(rawSignals, upperFrequencyBound, rawSampleRate)
-    new_points = np.arange(x.shape[1], step=rawSampleRate / sampleRate)
+def apply_filter(input_signals, float_precision, input_sample_rate,
+                 output_sample_rate, lower_frequency_bound, upper_frequency_bound):
+    x = butter_lowpass_filter(input_signals, upper_frequency_bound, input_sample_rate)
+    new_points = np.arange(x.shape[1], step=input_sample_rate / output_sample_rate)
     x = CubicSpline(np.arange(x.shape[1]), x, axis=1)(new_points)
-    x = to_precision(x, floatPrecison)
-
+    x = x.astype(float_precision)
     return x
 
 
-rawSampleRate = 500
-rawSignals = sys.stdin.buffer.read()
-convertedSignals = apply_filter(rawSignals, rawSampleRate, os.environ['sampleRate'], os.environ['floatPrecison'],
-                                os.environ['lowerFrequencyBound'], os.environ['upperFrequencyBound'])
-sys.stdout.buffer.write(convertedSignals.tobytes())
+def create_settings():
+    float_precision = int(os.environ['floatPrecision'])
+    if float_precision not in [32, 64]:
+        raise Exception(f'invalid float precision: {float_precision}')
+
+    return {
+        'float_precision': np.float32 if float_precision == 32 else np.float64,
+        'input_sample_rate': 500,
+        'output_sample_rate': int(os.environ['sampleRate']),
+        'lower_frequency_bound': int(os.environ['lowerFrequencyBound']),
+        'upper_frequency_bound': int(os.environ['upperFrequencyBound']),
+    }
+
+
+def read_signals():
+    input_bytes = sys.stdin.buffer.read()
+    return np.frombuffer(input_bytes, dtype=np.float64)\
+        .reshape(12, len(input_bytes) // (12 * np.dtype(np.float64).itemsize))
+
+
+output_signals = apply_filter(read_signals(), **create_settings())
+sys.stdout.buffer.write(output_signals.tobytes())

@@ -1,0 +1,52 @@
+.plot-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.plot-screen__plot {
+    flex-grow: 1;
+    height: 100%;
+    overflow: scroll;
+}
+
+.plot-screen__buttons {
+    background-color: #fff;
+    display: flex;
+    padding: 16px;
+}
+
+.plot-screen__button--primary {
+    flex-grow: 1;
+}
+
+.plot-screen__button-subtext {
+    display: none;
+}
+
+@media screen and (min-width: 480px) {
+    .plot-screen__buttons {
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    .plot-screen__button--primary {
+        flex-grow: 0;
+    }
+
+    .plot-screen__button-subtext {
+        display: inline;
+    }
+}
+
+@media screen and (max-width: 720px) {
+    .plot-screen__button {
+        min-width: 36px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .plot-screen__button .ms-Button-textContainer {
+        display: none;
+    }
+}

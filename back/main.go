@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
@@ -11,7 +12,6 @@ import (
 	"log"
 	"mime/multipart"
 	"net/http"
-	"strconv"
 )
 
 var (
@@ -23,7 +23,6 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{token}", handleGet).Methods("GET")
 	r.HandleFunc("/", handleUpload).Methods("POST")
-	r.HandleFunc("/process/{token}", handleProcess).Methods("POST")
 	http.Handle("/", handlers.CORS()(r))
 
 	port := flag.Int("port", 8001, "port for listening")
@@ -112,9 +111,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var entry = Entry{
-		Sex: Sex(resolveEntryField(converterResponseBody[:1][0], r.Form.Get("sex"))),
-		Age: Age(resolveEntryField(converterResponseBody[1:2][0], r.Form.Get("age"))),
-		Signals: converterResponseBody[2:],
+		Signals: converterResponseBody,
 	}
 
 	var token = Token(r.Form.Get("token"))
@@ -128,36 +125,8 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	store.tokenToEntry[token] = entry
 	store.Unlock()
 
-	preprocessParams, err := parsePreprocessParams(r)
-	if err != nil {
-		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
+	response, _ := json.Marshal(TokenResponse{Token: token})
 
-	signals, err := preprocess(entry.Signals, preprocessParams)
-	if err != nil {
-		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/octet-stream")
-	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	_, _ = w.Write(signals)
-}
-
-func resolveEntryField(fromConverter byte, fromForm string) byte {
-	if fromConverter != byte(0xff) {
-		return fromConverter
-	}
-
-	if i, err := strconv.Atoi(fromForm); err == nil {
-		return byte(i)
-	}
-
-	return fromConverter
-}
-
-func handleProcess(w http.ResponseWriter, r *http.Request) {
-	// Get entry by request token, preprocess it without downsample and send it to the model
-	// After that return model predictions to the front
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(response)
 }

@@ -20,7 +20,12 @@ type Store struct {
 }
 
 type preprocessParams struct {
-	downsampleFactor    int
+	floatPrecision      int
 	lowerFrequencyBound int
+	sampleRate          int
 	upperFrequencyBound int
+}
+
+type TokenResponse struct {
+	Token Token `json:"token"`
 }

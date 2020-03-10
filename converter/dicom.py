@@ -6,8 +6,6 @@ import re
 import io
 
 dataset = pydicom.dcmread(io.BytesIO(sys.stdin.buffer.read()))
-sex = 1 if dataset.PatientSex == 'M' else 0
-age = int(re.sub("[^0-9]", "", dataset.PatientAge).strip("0"))
 
 dicom = dataset
 
@@ -27,6 +25,4 @@ unpacked_waveform_data = struct.unpack(unpack_fmt, wavewform_data)
 signals = np.asarray(unpacked_waveform_data, dtype=np.float64).reshape(
     samples, channels_no).transpose()[:, ::2]
 
-sys.stdout.buffer.write(sex.to_bytes(1, 'little'))
-sys.stdout.buffer.write(age.to_bytes(1, 'little'))
 sys.stdout.buffer.write(signals.tobytes())
