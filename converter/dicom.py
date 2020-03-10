@@ -2,7 +2,6 @@ import numpy as np
 import sys
 import pydicom
 import struct
-import re
 import io
 
 dataset = pydicom.dcmread(io.BytesIO(sys.stdin.buffer.read()))

@@ -1,8 +1,16 @@
 FROM golang:latest
 
 WORKDIR /converter-app
+#installing python and python dependencies:
+RUN apt-get update && apt-get install -y python3-pip
+RUN apt-get install -y libopenblas-dev gfortran
 
-COPY . .
+COPY ./requirements.txt ./
+
+RUN pip3 install scipy
+RUN pip3 install -r requirements.txt
+
+COPY . /converter-app
 
 # Build the Go app
 RUN go build -o main .
