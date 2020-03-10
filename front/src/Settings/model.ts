@@ -18,7 +18,7 @@ const defaultSettingsState: Settings = {
     upperFrequencyBound: 190,
 }
 
-const settingsStore = createStore<Settings>(defaultSettingsState)
+const $settings = createStore<Settings>(defaultSettingsState)
     .on(setFloatPrecision, (state, floatPrecision) => ({
         ...state,
         floatPrecision,
@@ -49,7 +49,7 @@ export const defaultFrontendSettingsState: FrontendSettingsState = {
     visibleLeads: new Set(LEADS),
 }
 
-const frontendSettingsStore = createStore<FrontendSettingsState>(
+const $frontendSettings = createStore<FrontendSettingsState>(
     defaultFrontendSettingsState,
 )
     .on(setGridSize, (state, scale) => ({
@@ -61,7 +61,8 @@ const frontendSettingsStore = createStore<FrontendSettingsState>(
         speed,
     }))
     .on(toggleVisibleLead, (state, lead) => {
-        const visibleLeads = new Set(state.visibleLeads)
+        const { visibleLeads } = state
+
         if (visibleLeads.has(lead)) {
             visibleLeads.delete(lead)
         } else {
@@ -73,6 +74,6 @@ const frontendSettingsStore = createStore<FrontendSettingsState>(
             visibleLeads,
         }
     })
-    .reset(resetSettings)
+    .on(resetSettings, () => defaultFrontendSettingsState)
 
-export { frontendSettingsStore, settingsStore }
+export { $frontendSettings, $settings }

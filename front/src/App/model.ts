@@ -2,7 +2,7 @@ import { createStore } from 'effector'
 import { Token } from './types'
 import {setToken} from "./events";
 
-const tokenStore = createStore<Token | null>(null)
+const $token = createStore<Token>(null)
     .on(setToken, (_, token) => token)
 
-export { tokenStore }
+export { $token }

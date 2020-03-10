@@ -1,8 +1,18 @@
-import { createStore } from 'effector'
+import { createStore, createStoreObject, merge, sample } from 'effector'
 import { Signals } from './types'
-import { setGraphPaperGridUrl, setSignals } from './events'
+import { setGraphPaperGridUrl } from './events'
 import { createGraphPaperGrid } from './graphPaperGrid'
-import { defaultFrontendSettingsState } from '../Settings/model'
+import { defaultFrontendSettingsState, $settings } from '../Settings/model'
+import { $token } from '../App/model'
+import {
+    resetSettings,
+    setFloatPrecision,
+    setLowerFrequencyBound,
+    setSampleRate,
+    setUpperFrequencyBound,
+} from '../Settings/events'
+import { setToken } from '../App/events'
+import { fetchSignalsFx } from './effects'
 
 export type PlotState = {
     graphPaperGridUrl: string
@@ -10,18 +20,36 @@ export type PlotState = {
 }
 
 const defaultPlotState: PlotState = {
-    graphPaperGridUrl: createGraphPaperGrid(defaultFrontendSettingsState.gridSize),
+    graphPaperGridUrl: createGraphPaperGrid(
+        defaultFrontendSettingsState.gridSize,
+    ),
     signals: Array(12).fill(new Float32Array()),
 }
 
-const plotStore = createStore<PlotState>(defaultPlotState)
+const $plot = createStore<PlotState>(defaultPlotState)
     .on(setGraphPaperGridUrl, (state, svgGridUrl) => ({
         ...state,
         graphPaperGridUrl: svgGridUrl,
     }))
-    .on(setSignals, (state, signals) => ({
+    .on(fetchSignalsFx.done, (state, { result }) => ({
         ...state,
-        signals,
+        signals: result,
     }))
 
-export { plotStore }
+sample({
+    source: createStoreObject({
+        settings: $settings,
+        token: $token,
+    }),
+    clock: merge([
+        resetSettings,
+        setFloatPrecision,
+        setLowerFrequencyBound,
+        setSampleRate,
+        setToken,
+        setUpperFrequencyBound,
+    ]),
+    target: fetchSignalsFx,
+})
+
+export { $plot }

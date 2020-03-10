@@ -1,1 +1,1 @@
-export type Token = string
+export type Token = string | null

@@ -19,16 +19,16 @@ import {
     toggleVisibleLead,
 } from './events'
 import { FLOAT_PRECISIONS, FloatPrecision, Lead, LEADS, Speed } from './types'
-import { frontendSettingsStore, settingsStore } from './model'
+import { $frontendSettings, $settings } from './model'
 
 function Settings() {
-    const { gridSize, speed, visibleLeads } = useStore(frontendSettingsStore)
+    const { gridSize, speed, visibleLeads } = useStore($frontendSettings)
     const {
         floatPrecision,
         lowerFrequencyBound,
         sampleRate,
         upperFrequencyBound,
-    } = useStore(settingsStore)
+    } = useStore($settings)
 
     const [isDeveloperSettings, setDeveloperSettings] = useState<boolean>(false)
 
@@ -90,7 +90,7 @@ function Settings() {
                 <Slider
                     value={lowerFrequencyBound}
                     label="Lower frequency bound"
-                    max={50}
+                    max={30}
                     min={0}
                     onChange={setLowerFrequencyBound}
                     step={1}
@@ -100,7 +100,7 @@ function Settings() {
                     value={upperFrequencyBound}
                     label="Upper frequency bound"
                     max={200}
-                    min={50}
+                    min={30}
                     onChange={setUpperFrequencyBound}
                     step={10}
                     valueFormat={(value: number) => `${value} Hz`}

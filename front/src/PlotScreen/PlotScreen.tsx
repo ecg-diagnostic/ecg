@@ -10,13 +10,12 @@ import { useConstCallback } from '@uifabric/react-hooks'
 import './PlotScreen.css'
 import { Settings } from '../Settings'
 import { Plot } from '../Plot'
-import { tokenStore } from '../App/model'
-import { fetchSignals } from '../App/events'
+import { $token } from '../App/model'
 import { Redirect, useHistory } from 'react-router-dom'
 
 const PlotScreen: React.FunctionComponent = () => {
     const history = useHistory()
-    const token = useStore(tokenStore)
+    const token = useStore($token)
     const [isFilterOpen, setFilterOpen] = useState<boolean>(false)
 
     const openPanel = useConstCallback(() => setFilterOpen(true))
@@ -25,12 +24,6 @@ const PlotScreen: React.FunctionComponent = () => {
     const onRenderFooterContent = useConstCallback(() => (
         <Stack horizontal tokens={{ childrenGap: 6 }}>
             <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
-            <PrimaryButton onClick={() => {
-                fetchSignals(token)
-                dismissPanel()
-            }}>
-                Apply
-            </PrimaryButton>
         </Stack>
     ))
 
@@ -77,7 +70,10 @@ const PlotScreen: React.FunctionComponent = () => {
                     className="plot-screen__button--primary"
                     disabled={isFilterOpen}
                 >
-                    Diagnose <span className="plot-screen__button-subtext">&nbsp;abnormalities</span>
+                    Diagnose{' '}
+                    <span className="plot-screen__button-subtext">
+                        &nbsp;abnormalities
+                    </span>
                 </PrimaryButton>
             </Stack>
 

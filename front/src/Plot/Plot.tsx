@@ -1,14 +1,14 @@
 import React, { createRef, useEffect } from 'react'
 import { useStore } from 'effector-react'
-import { plotStore } from './model'
+import { $plot } from './model'
 import * as d3 from 'd3'
 import { LEADS } from '../Settings/types'
-import { frontendSettingsStore, settingsStore } from '../Settings/model'
+import { $frontendSettings, $settings } from '../Settings/model'
 
 function Plot() {
-    const { signals, graphPaperGridUrl } = useStore(plotStore)
-    const { gridSize, speed, visibleLeads } = useStore(frontendSettingsStore)
-    const { sampleRate } = useStore(settingsStore)
+    const { signals, graphPaperGridUrl } = useStore($plot)
+    const { gridSize, speed, visibleLeads } = useStore($frontendSettings)
+    const { sampleRate } = useStore($settings)
     let svgRef = createRef<SVGSVGElement>()
 
     const FIVE_MM_IN_GRID_CELL = 5
