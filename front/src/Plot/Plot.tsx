@@ -7,10 +7,20 @@ import { frontendSettingsStore, settingsStore } from '../Settings/model'
 
 function Plot() {
     const { signals, graphPaperGridUrl } = useStore(plotStore)
-    const { scale, speed, visibleLeads } = useStore(frontendSettingsStore)
+    const { gridSize, speed, visibleLeads } = useStore(frontendSettingsStore)
     const { sampleRate } = useStore(settingsStore)
-
     let svgRef = createRef<SVGSVGElement>()
+
+    const FIVE_MM_IN_GRID_CELL = 5
+    const CELLS_BETWEEN_SIGNALS = 4
+
+    const topPadding = 0.75 * gridSize * CELLS_BETWEEN_SIGNALS
+    const interLeadPadding = 11 * gridSize * CELLS_BETWEEN_SIGNALS
+    const bottomPadding = 0.5 * gridSize * CELLS_BETWEEN_SIGNALS
+    const svgHeight = topPadding + interLeadPadding + bottomPadding
+
+    const seconds = signals[0].length / sampleRate
+    const svgWidth = 2 * gridSize + seconds * (speed / 5) * gridSize
 
     useEffect(() => {
         if (svgRef.current) {
@@ -26,16 +36,15 @@ function Plot() {
             }
 
             const datum = Array.from(signals[lead]).map((y, x) => {
-                const FIVE_MM_IN_GRID_CELL = 5
-                x = ((x / sampleRate) * speed * scale) / FIVE_MM_IN_GRID_CELL
+                x = ((x / sampleRate) * speed * gridSize) / FIVE_MM_IN_GRID_CELL
 
-                const CELLS_BETWEEN_SIGNALS = 4
                 y =
-                    CELLS_BETWEEN_SIGNALS * scale * 0.75 +
-                    CELLS_BETWEEN_SIGNALS * lead_i * scale +
-                    (-y * 1000) / 2 / scale
+                    CELLS_BETWEEN_SIGNALS * gridSize * 0.75 +
+                    CELLS_BETWEEN_SIGNALS * lead_i * gridSize +
+                    // (-y * 1000) / 2 / gridSize
+                    -y * 2 * gridSize
 
-                return [scale + x, y]
+                return [gridSize + x, y]
             })
             lead_i++
 
@@ -54,16 +63,20 @@ function Plot() {
                         .y(d => d[1]),
                 )
         })
-    }, [scale, signals, speed, visibleLeads])
+    }, [gridSize, sampleRate, signals, speed, svgRef, visibleLeads])
 
     return (
         <svg
             ref={svgRef}
             style={{
                 backgroundImage: `url(${graphPaperGridUrl})`,
-                height: '100%',
-                width: '100%',
+                backgroundSize: `${gridSize}px`,
+                display: 'block',
+                minHeight: '100%',
+                minWidth: '100%',
             }}
+            height={svgHeight}
+            width={svgWidth}
         />
     )
 }

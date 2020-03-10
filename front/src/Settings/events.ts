@@ -5,7 +5,7 @@ const resetSettings = createEvent()
 const setFloatPrecision = createEvent<FloatPrecision>()
 const setLowerFrequencyBound = createEvent<Hz>()
 const setSampleRate = createEvent<Hz>()
-const setScale = createEvent<number>()
+const setGridSize = createEvent<number>()
 const setSpeed = createEvent<Speed>()
 const setUpperFrequencyBound = createEvent<Hz>()
 const toggleVisibleLead = createEvent<Lead>()
@@ -15,7 +15,7 @@ export {
     setFloatPrecision,
     setLowerFrequencyBound,
     setSampleRate,
-    setScale,
+    setGridSize,
     setSpeed,
     setUpperFrequencyBound,
     toggleVisibleLead,

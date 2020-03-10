@@ -1,13 +1,19 @@
-import React, {useCallback, useState} from 'react'
+import React, { useState } from 'react'
 import { useStore } from 'effector-react'
-import { DefaultButton, Label, Slider, Stack, Toggle } from 'office-ui-fabric-react'
+import {
+    DefaultButton,
+    Label,
+    Slider,
+    Stack,
+    Toggle,
+} from 'office-ui-fabric-react'
 import './Settings.css'
 import {
     resetSettings,
     setFloatPrecision,
     setLowerFrequencyBound,
     setSampleRate,
-    setScale,
+    setGridSize,
     setSpeed,
     setUpperFrequencyBound,
     toggleVisibleLead,
@@ -16,7 +22,7 @@ import { FLOAT_PRECISIONS, FloatPrecision, Lead, LEADS, Speed } from './types'
 import { frontendSettingsStore, settingsStore } from './model'
 
 function Settings() {
-    const { scale, speed, visibleLeads } = useStore(frontendSettingsStore)
+    const { gridSize, speed, visibleLeads } = useStore(frontendSettingsStore)
     const {
         floatPrecision,
         lowerFrequencyBound,
@@ -29,11 +35,11 @@ function Settings() {
     return (
         <Stack tokens={{ childrenGap: 12 }} className="settings">
             <Slider
-                value={scale}
+                value={gridSize}
                 label="Zoom"
                 max={30}
                 min={10}
-                onChange={setScale}
+                onChange={setGridSize}
                 step={1}
                 valueFormat={(value: number) => `${value * 2} px/cm`}
             />
@@ -102,8 +108,8 @@ function Settings() {
             </Stack>
 
             <Toggle
-                onText="Disable developer settings"
-                offText="Enable developer settings"
+                onText="Hide developer settings"
+                offText="Show developer settings"
                 onChange={() => setDeveloperSettings(!isDeveloperSettings)}
             />
 
@@ -111,7 +117,7 @@ function Settings() {
                 <Stack>
                     <Slider
                         value={sampleRate}
-                        label="Sample rate"
+                        label="Frontend sample rate"
                         max={500}
                         min={100}
                         onChange={setSampleRate}

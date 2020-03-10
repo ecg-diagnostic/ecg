@@ -10,7 +10,7 @@ export type PlotState = {
 }
 
 const defaultPlotState: PlotState = {
-    graphPaperGridUrl: createGraphPaperGrid(defaultFrontendSettingsState.scale),
+    graphPaperGridUrl: createGraphPaperGrid(defaultFrontendSettingsState.gridSize),
     signals: Array(12).fill(new Float32Array()),
 }
 

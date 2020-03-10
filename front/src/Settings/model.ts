@@ -5,7 +5,7 @@ import {
     setFloatPrecision,
     setLowerFrequencyBound,
     setSampleRate,
-    setScale,
+    setGridSize,
     setSpeed,
     setUpperFrequencyBound,
     toggleVisibleLead,
@@ -14,8 +14,8 @@ import {
 const defaultSettingsState: Settings = {
     floatPrecision: FloatPrecision.Float32,
     lowerFrequencyBound: 5,
-    sampleRate: 100,
-    upperFrequencyBound: 180,
+    sampleRate: 200,
+    upperFrequencyBound: 190,
 }
 
 const settingsStore = createStore<Settings>(defaultSettingsState)
@@ -38,13 +38,13 @@ const settingsStore = createStore<Settings>(defaultSettingsState)
     .reset(resetSettings)
 
 export type FrontendSettingsState = {
-    scale: number
-    speed: Speed
-    visibleLeads: Set<Lead>
+    gridSize: number,
+    speed: Speed,
+    visibleLeads: Set<Lead>,
 }
 
 export const defaultFrontendSettingsState: FrontendSettingsState = {
-    scale: 20,
+    gridSize: 20,
     speed: Speed._25mmPerSec,
     visibleLeads: new Set(LEADS),
 }
@@ -52,9 +52,9 @@ export const defaultFrontendSettingsState: FrontendSettingsState = {
 const frontendSettingsStore = createStore<FrontendSettingsState>(
     defaultFrontendSettingsState,
 )
-    .on(setScale, (state, scale) => ({
+    .on(setGridSize, (state, scale) => ({
         ...state,
-        scale,
+        gridSize: scale,
     }))
     .on(setSpeed, (state, speed) => ({
         ...state,
