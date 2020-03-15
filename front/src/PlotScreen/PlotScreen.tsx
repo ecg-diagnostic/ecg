@@ -66,9 +66,10 @@ const PlotScreen: React.FunctionComponent = () => {
                     Settings
                 </DefaultButton>
                 <PrimaryButton
-                    iconProps={{ iconName: 'Health' }}
                     className="plot-screen__button--primary"
                     disabled={isFilterOpen}
+                    iconProps={{ iconName: 'Health' }}
+                    onClick={() => history.push('/abnormalities')}
                 >
                     Diagnose{' '}
                     <span className="plot-screen__button-subtext">

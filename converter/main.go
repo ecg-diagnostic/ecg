@@ -14,10 +14,12 @@ import (
 var parsers []func([]byte) ([]byte, error)
 
 func main() {
+	http.HandleFunc("/", handle)
+
 	port := flag.Int("port", 8002, "port for listening")
 	flag.Parse()
 
-	http.HandleFunc("/", handle)
+	fmt.Printf("Converter listening :%d\n", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	log.Fatal(err)
 }

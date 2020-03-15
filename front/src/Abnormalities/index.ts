@@ -1,0 +1,1 @@
+export { Abnormalities } from './Abnormalities'

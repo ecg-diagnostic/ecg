@@ -23,12 +23,14 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{token}", handleGet).Methods("GET")
 	r.HandleFunc("/", handleUpload).Methods("POST")
+	r.HandleFunc("/abnormalities/{token}", handleGetAbnormalities).Methods("POST")
 	http.Handle("/", handlers.CORS()(r))
 
 	port := flag.Int("port", 8001, "port for listening")
 	converterPort = flag.Int("converter-port", 8002, "port for converter")
 	flag.Parse()
 
+	fmt.Printf("Backend listening :%d\n", *port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
 	log.Fatal(err)
 }
@@ -126,6 +128,42 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	store.Unlock()
 
 	response, _ := json.Marshal(TokenResponse{Token: token})
+
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(response)
+}
+
+func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
+	token, ok := mux.Vars(r)["token"]
+	if !ok {
+		http.Error(w, "empty token", http.StatusNotFound)
+		return
+	}
+
+	store.RLock()
+	entry, ok := store.tokenToEntry[Token(token)]
+	store.RUnlock()
+
+	if !ok {
+		http.Error(w, fmt.Sprintf("entry with token %s not found", token), http.StatusNotFound)
+		return
+	}
+
+	preprocessParams, err := parsePreprocessParams(r)
+	if err != nil {
+		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+
+	// signals
+	_, err = preprocess(entry.Signals, preprocessParams)
+	if err != nil {
+		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Set stub for frontend
+	response, _ := json.Marshal([]float32{0.1, 0.2, 0, 0, 0, 0.98, 0, 0.41})
 
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(response)

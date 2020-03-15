@@ -37,10 +37,10 @@ const $plot = createStore<PlotState>(defaultPlotState)
     }))
 
 sample({
-    source: createStoreObject({
+    source: {
         settings: $settings,
         token: $token,
-    }),
+    },
     clock: merge([
         resetSettings,
         setFloatPrecision,

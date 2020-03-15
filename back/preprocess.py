@@ -24,9 +24,12 @@ def apply_filter(input_signals, float_precision, input_sample_rate,
 
 
 def create_settings():
-    float_precision = int(os.environ['floatPrecision'])
-    if float_precision not in [32, 64]:
-        raise Exception(f'invalid float precision: {float_precision}')
+    if 'floatPrecision' not in os.environ:
+        float_precision = np.float32
+    else:
+        float_precision = int(os.environ['floatPrecision'])
+        if float_precision not in [32, 64]:
+            raise Exception(f'invalid float precision: {float_precision}')
 
     return {
         'float_precision': np.float32 if float_precision == 32 else np.float64,
