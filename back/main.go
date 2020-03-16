@@ -24,7 +24,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{token}", handleGet).Methods("GET")
 	r.HandleFunc("/", handleUpload).Methods("POST")
-	r.HandleFunc("/abnormalities/{token}", handleGetAbnormalities).Methods("POST")
+	r.HandleFunc("/abnormalities/{token}", handleGetAbnormalities).Methods("GET")
 	http.Handle("/", handlers.CORS()(r))
 
 	port := flag.Int("port", 8001, "port for listening")
