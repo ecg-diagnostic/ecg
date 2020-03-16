@@ -16,6 +16,7 @@ import (
 
 var (
 	converterPort *int
+	modelPort     *int
 	store         = Store{tokenToEntry: make(map[Token]Entry)}
 )
 
@@ -28,6 +29,7 @@ func main() {
 
 	port := flag.Int("port", 8001, "port for listening")
 	converterPort = flag.Int("converter-port", 8002, "port for converter")
+	modelPort = flag.Int("model-port", 8003, "port for model")
 	flag.Parse()
 
 	fmt.Printf("Backend listening :%d\n", *port)
@@ -149,22 +151,30 @@ func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	preprocessParams, err := parsePreprocessParams(r)
+	var modelUrl = fmt.Sprintf("http://localhost:%d", *modelPort)
+	var contentType = "application/octet-stream"
+	var modelRequestBody = bytes.NewBuffer(entry.Signals)
+
+	modelResponse, err := http.Post(modelUrl, contentType, modelRequestBody)
+	defer modelResponse.Body.Close()
+
 	if err != nil {
-		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// signals
-	_, err = preprocess(entry.Signals, preprocessParams)
-	if err != nil {
-		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
+	if modelResponse.StatusCode != http.StatusOK {
+		var message = fmt.Sprintf("can't read signals with token %s in model", token)
+		http.Error(w, message, http.StatusInternalServerError)
 		return
 	}
 
-	// Set stub for frontend
-	response, _ := json.Marshal([]float32{0.1, 0.2, 0, 0, 0, 0.98, 0, 0.41})
+	modelResponseBody, err := ioutil.ReadAll(modelResponse.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
-	_, _ = w.Write(response)
+	_, _ = w.Write(modelResponseBody)
 }

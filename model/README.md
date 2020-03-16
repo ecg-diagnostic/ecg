@@ -39,7 +39,7 @@
 ### Как пользоваться компонентой
 Для того, чтобы поднять сервер, предоставляющий API к нейросетевому классификатору, нужно из папки /ecg/model воспользоваться следующей командой
 ```bash
-$ uvicorn api.server:app --reload --host localhost --port 8001
+$ uvicorn api.server:app --reload --host localhost --port 8003
 ```
 При возникновении вопросов можно обратиться к [документации uvicorn](https://www.uvicorn.org/deployment/).
 

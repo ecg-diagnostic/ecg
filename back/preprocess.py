@@ -15,7 +15,7 @@ def butter_lowpass_filter(data, cutoff, fs, order=3):
 
 
 def apply_filter(input_signals, float_precision, input_sample_rate,
-                 output_sample_rate, lower_frequency_bound, upper_frequency_bound):
+                 output_sample_rate, _, upper_frequency_bound):
     x = butter_lowpass_filter(input_signals, upper_frequency_bound, input_sample_rate)
     new_points = np.arange(x.shape[1], step=input_sample_rate / output_sample_rate)
     x = CubicSpline(np.arange(x.shape[1]), x, axis=1)(new_points)
