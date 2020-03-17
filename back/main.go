@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
@@ -22,10 +21,10 @@ var (
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{token}", handleGet).Methods("GET")
-	r.HandleFunc("/", handleUpload).Methods("POST")
-	r.HandleFunc("/abnormalities/{token}", handleGetAbnormalities).Methods("POST")
-	http.Handle("/", handlers.CORS()(r))
+	r.HandleFunc("/api/upload", handleUpload).Methods("POST")
+	r.HandleFunc("/api/{token}", handleGet).Methods("GET")
+	r.HandleFunc("/api/{token}/abnormalities", handleGetAbnormalities).Methods("GET")
+	http.Handle("/", r)
 
 	port := flag.Int("port", 8001, "port for listening")
 	converterPort = flag.Int("converter-port", 8002, "port for converter")
@@ -151,7 +150,7 @@ func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var modelUrl = fmt.Sprintf("http://localhost:%d", *modelPort)
+	var modelUrl = fmt.Sprintf("http://localhost:%d/predict", *modelPort)
 	var contentType = "application/octet-stream"
 	var modelRequestBody = bytes.NewBuffer(entry.Signals)
 

@@ -10,11 +10,11 @@ const fetchSignalsFx = createEffect({
         const { settings, token } = params
 
         if (token === null) {
-            throw new Error(`empty token`)
+            throw new Error('empty token')
         }
 
         const query = new URLSearchParams(Object(settings)).toString()
-        const url = `http://localhost:8001/${token}?${query}`
+        const url = `/api/${token}?${query}`
 
         return fetch(url)
             .then(response => {

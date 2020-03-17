@@ -12,6 +12,7 @@ import { Settings } from '../Settings'
 import { Plot } from '../Plot'
 import { $token } from '../App/model'
 import { Redirect, useHistory } from 'react-router-dom'
+import { fetchAbnormalities } from './events'
 
 const PlotScreen: React.FunctionComponent = () => {
     const history = useHistory()
@@ -69,7 +70,10 @@ const PlotScreen: React.FunctionComponent = () => {
                     className="plot-screen__button--primary"
                     disabled={isFilterOpen}
                     iconProps={{ iconName: 'Health' }}
-                    onClick={() => history.push('/abnormalities')}
+                    onClick={() => {
+                        fetchAbnormalities()
+                        history.push('/abnormalities')
+                    }}
                 >
                     Diagnose{' '}
                     <span className="plot-screen__button-subtext">

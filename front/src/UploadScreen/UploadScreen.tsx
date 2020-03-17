@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { setToken } from '../App/events'
 
-function Landing() {
+function UploadScreen() {
     const [files, setFiles] = useState<Array<File>>([])
     const history = useHistory()
 
@@ -14,10 +14,9 @@ function Landing() {
             formData.append('files[]', file)
         })
 
-        fetch('http://localhost:8001', {
+        fetch('/api/upload', {
             body: formData,
             method: 'POST',
-            mode: 'cors',
         })
             .then(response => {
                 if (response.ok) {
@@ -65,4 +64,4 @@ function Landing() {
     )
 }
 
-export { Landing }
+export { UploadScreen }
