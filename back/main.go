@@ -91,7 +91,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 
 	_ = converterWriter.Close()
 
-	var converterUrl = fmt.Sprintf("http://localhost:%d", *converterPort)
+	var converterUrl = fmt.Sprintf("http://converter:%d", *converterPort)
 	var contentType = converterWriter.FormDataContentType()
 
 	converterResponse, err := http.Post(converterUrl, contentType, converterRequestBody)
@@ -150,7 +150,7 @@ func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var modelUrl = fmt.Sprintf("http://localhost:%d/predict", *modelPort)
+	var modelUrl = fmt.Sprintf("http://model:%d/predict", *modelPort)
 	var contentType = "application/octet-stream"
 	var modelRequestBody = bytes.NewBuffer(entry.Signals)
 

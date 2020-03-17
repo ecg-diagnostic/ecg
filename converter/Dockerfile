@@ -2,8 +2,7 @@ FROM golang:latest
 
 WORKDIR /converter-app
 #installing python and python dependencies:
-RUN apt-get update && apt-get install -y python3-pip
-RUN apt-get install -y libopenblas-dev gfortran
+RUN apt-get update && apt-get install -y python3-pip libopenblas-dev gfortran
 
 COPY ./requirements.txt ./
 
