@@ -162,15 +162,14 @@ func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if modelResponse.StatusCode != http.StatusOK {
-		var message = fmt.Sprintf("can't read signals with token %s in model", token)
-		http.Error(w, message, http.StatusInternalServerError)
+	modelResponseBody, err := ioutil.ReadAll(modelResponse.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	modelResponseBody, err := ioutil.ReadAll(modelResponse.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if modelResponse.StatusCode != http.StatusOK {
+		http.Error(w, string(modelResponseBody), http.StatusInternalServerError)
 		return
 	}
 
