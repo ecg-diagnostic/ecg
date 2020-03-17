@@ -1,4 +1,4 @@
-import { createStore, createStoreObject, merge, sample } from 'effector'
+import { createStore, merge, sample } from 'effector'
 import { Signals } from './types'
 import { setGraphPaperGridUrl } from './events'
 import { createGraphPaperGrid } from './graphPaperGrid'

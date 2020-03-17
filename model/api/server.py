@@ -1,6 +1,6 @@
 from typing import List
 from pydantic import BaseModel
-from fastapi import FastAPI, File, UploadFile, Depends
+from fastapi import FastAPI, Depends, Request
 import numpy as np
 
 from .ml.arrhythmia_classifier import leads, ArrhythmiaClassifier, get_model
@@ -14,8 +14,8 @@ app = FastAPI()
 
 
 @app.post('/predict', response_model=PredictResponse)
-def predict(ecg_bin: UploadFile = File(...), model: ArrhythmiaClassifier = Depends(get_model)):
-    contents = ecg_bin.file.read()
+async def predict(request: Request, model: ArrhythmiaClassifier = Depends(get_model)):
+    contents = await request.body()
     signal = np.frombuffer(contents, dtype=np.float64)
     X = signal.reshape((leads, signal.size // leads))
 

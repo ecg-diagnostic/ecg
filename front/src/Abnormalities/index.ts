@@ -1,1 +1,1 @@
-export { Abnormalities } from './Abnormalities'
+export { AbnormalitiesScreen } from './AbnormalitiesScreen'

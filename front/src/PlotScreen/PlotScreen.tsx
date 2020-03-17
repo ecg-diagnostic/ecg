@@ -8,7 +8,6 @@ import {
 } from 'office-ui-fabric-react'
 import { useConstCallback } from '@uifabric/react-hooks'
 import './PlotScreen.css'
-import { fetchAbnormalitiesFx } from '../Abnormalities/effects'
 import { Settings } from '../Settings'
 import { Plot } from '../Plot'
 import { $token } from '../App/model'
@@ -71,7 +70,10 @@ const PlotScreen: React.FunctionComponent = () => {
                     className="plot-screen__button--primary"
                     disabled={isFilterOpen}
                     iconProps={{ iconName: 'Health' }}
-                    onClick={() => fetchAbnormalities()}
+                    onClick={() => {
+                        fetchAbnormalities()
+                        history.push('/abnormalities')
+                    }}
                 >
                     Diagnose{' '}
                     <span className="plot-screen__button-subtext">

@@ -1,6 +1,7 @@
 import { createEffect } from 'effector'
 import { Token } from '../App/types'
 import { Settings } from '../Settings/types'
+import { Confidences } from './types'
 
 const fetchAbnormalitiesFx = createEffect({
     handler: (params: {
@@ -14,7 +15,7 @@ const fetchAbnormalitiesFx = createEffect({
         }
 
         const query = new URLSearchParams(Object(settings)).toString()
-        const url = `http://localhost:8001/abnormalities/${token}?${query}`
+        const url = `/api/${token}/abnormalities?${query}`
 
         return fetch(url)
             .then(response => {
@@ -23,7 +24,7 @@ const fetchAbnormalitiesFx = createEffect({
                 }
                 throw new Error(response.statusText)
             })
-            .then(response => response as Array<number>)
+            .then(response => response.prediction as Confidences)
     },
 })
 

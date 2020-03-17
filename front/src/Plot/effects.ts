@@ -14,7 +14,7 @@ const fetchSignalsFx = createEffect({
         }
 
         const query = new URLSearchParams(Object(settings)).toString()
-        const url = `http://localhost:8001/${token}?${query}`
+        const url = `/api/${token}?${query}`
 
         return fetch(url)
             .then(response => {
