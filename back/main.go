@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -13,11 +12,7 @@ import (
 	"net/http"
 )
 
-var (
-	converterPort *int
-	modelPort     *int
-	store         = Store{tokenToEntry: make(map[Token]Entry)}
-)
+var store = Store{tokenToEntry: make(map[Token]Entry)}
 
 func main() {
 	r := mux.NewRouter()
@@ -26,13 +21,9 @@ func main() {
 	r.HandleFunc("/api/{token}/abnormalities", handleGetAbnormalities).Methods("GET")
 	http.Handle("/", r)
 
-	port := flag.Int("port", 8001, "port for listening")
-	converterPort = flag.Int("converter-port", 8002, "port for converter")
-	modelPort = flag.Int("model-port", 8003, "port for model")
-	flag.Parse()
-
-	fmt.Printf("Backend listening :%d\n", *port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	var backAddr, listenAddr = GetBackAddr()
+	fmt.Printf("Backend listening %s\n", backAddr)
+	err := http.ListenAndServe(listenAddr, nil)
 	log.Fatal(err)
 }
 
@@ -91,10 +82,10 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 
 	_ = converterWriter.Close()
 
-	var converterUrl = fmt.Sprintf("http://converter:%d", *converterPort)
+	var converterAddr, _ = GetConverterAddr()
 	var contentType = converterWriter.FormDataContentType()
 
-	converterResponse, err := http.Post(converterUrl, contentType, converterRequestBody)
+	converterResponse, err := http.Post(converterAddr, contentType, converterRequestBody)
 	defer converterResponse.Body.Close()
 
 	if err != nil {
@@ -150,11 +141,11 @@ func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var modelUrl = fmt.Sprintf("http://model:%d/predict", *modelPort)
+	var modelAddr, _ = GetModelAddr()
 	var contentType = "application/octet-stream"
 	var modelRequestBody = bytes.NewBuffer(entry.Signals)
 
-	modelResponse, err := http.Post(modelUrl, contentType, modelRequestBody)
+	modelResponse, err := http.Post(modelAddr, contentType, modelRequestBody)
 	defer modelResponse.Body.Close()
 
 	if err != nil {

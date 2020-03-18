@@ -1,20 +1,19 @@
-FROM golang:latest
+FROM golang:alpine AS builder
+WORKDIR /converter
+COPY . .
+RUN apk update \
+    && apk add git \
+    && go get -d -v \
+    && go build -o /go/bin/converter
 
-WORKDIR /converter-app
-#installing python and python dependencies:
-RUN apt-get update && apt-get install -y python3-pip libopenblas-dev gfortran
-
-COPY ./requirements.txt ./
-
-RUN pip3 install scipy
-RUN pip3 install -r requirements.txt
-
-COPY . /converter-app
-
-# Build the Go app
-RUN go build -o main .
-
-# Expose port 8002 to the outside world
-EXPOSE 8002
-
-CMD ["./main"]
+FROM python:alpine
+WORKDIR /converter
+COPY --from=builder /converter .
+COPY --from=builder /go/bin/converter .
+RUN apk update \
+    && apk add openblas-dev gfortran \
+    && pip3 install pipenv \
+    && export LC_ALL=C.UTF-8 \
+    && export LANG=C.UTF-8 \
+    && pipenv install --ignore-pipfile
+CMD ["./converter"]

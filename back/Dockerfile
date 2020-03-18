@@ -1,23 +1,19 @@
-FROM golang:latest
+FROM golang:alpine AS builder
+WORKDIR /back
+COPY . .
+RUN apk update \
+    && apk add git \
+    && go get -d -v \
+    && go build -o /go/bin/back
 
-WORKDIR /be-app
-#installing python and python dependencies:
-RUN apt-get update && apt-get install -y python3-pip libopenblas-dev gfortran
-
-COPY ./requirements.txt ./
-
-RUN pip3 install scipy
-RUN pip3 install -r requirements.txt
-
-COPY . /be-app
-
-# Build the Go app
-RUN go get github.com/google/uuid
-RUN go get github.com/gorilla/handlers
-RUN go get github.com/gorilla/mux
-RUN go build -o main .
-
-# Expose port 8001 to the outside world
-EXPOSE 8001
-
-CMD ["./main"]
+FROM python:alpine
+WORKDIR /back
+COPY --from=builder /back .
+COPY --from=builder /go/bin/back .
+RUN apk update \
+    && apk add openblas-dev gfortran \
+    && pip3 install pipenv \
+    && export LC_ALL=C.UTF-8 \
+    && export LANG=C.UTF-8 \
+    && pipenv install --ignore-pipfile
+CMD ["./back"]

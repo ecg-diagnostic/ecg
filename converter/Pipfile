@@ -6,8 +6,8 @@ verify_ssl = true
 [dev-packages]
 
 [packages]
-numpy = "==1.17.3"
-pydicom = "==1.4.2"
+numpy = "*"
+pydicom = "*"
 scipy = "*"
 
 [requires]

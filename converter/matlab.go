@@ -11,7 +11,7 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 		return nil, nil
 	}
 
-	matlabCommand := exec.Command("python3", "matlab.py")
+	matlabCommand := exec.Command("pipenv", "run", "python3", "matlab.py")
 
 	stdin, err := matlabCommand.StdinPipe()
 	if err != nil {

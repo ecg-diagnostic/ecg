@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,11 +15,9 @@ var parsers []func([]byte) ([]byte, error)
 func main() {
 	http.HandleFunc("/", handle)
 
-	port := flag.Int("port", 8002, "port for listening")
-	flag.Parse()
-
-	fmt.Printf("Converter listening :%d\n", *port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), nil)
+	var converterAddr, listenAddr = GetConverterAddr()
+	fmt.Printf("Converter listening %s\n", converterAddr)
+	err := http.ListenAndServe(listenAddr, nil)
 	log.Fatal(err)
 }
 
