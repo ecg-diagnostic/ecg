@@ -12,7 +12,7 @@ def align_image(image_path, min_angle = -120, max_angle = 120, step = 0.2):
     for i in range(n_steps):
         img = img_bw.rotate(min_angle + step * i, fillcolor=(fill))
         img_array = np.asarray(img)
-        size = np.asarray(img_array).shape
+        size = img_array.shape
         black = (np.ones(size) * 255 - np.asarray(img_array)).astype('uint8')
         hist[i] = black.sum(axis=0)
 
