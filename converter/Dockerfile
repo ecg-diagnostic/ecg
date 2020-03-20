@@ -1,19 +1,19 @@
-FROM golang:alpine AS builder
+FROM golang:1.14-alpine AS builder
 WORKDIR /converter
 COPY . .
 RUN apk update \
     && apk add git \
     && go get -d -v \
-    && go build -o /go/bin/converter
+    && CGO_ENABLED=0 go build -o /go/bin/converter
 
-FROM python:alpine
+FROM python:3.8
 WORKDIR /converter
-COPY --from=builder /converter .
-COPY --from=builder /go/bin/converter .
-RUN apk update \
-    && apk add openblas-dev gfortran \
-    && pip3 install pipenv \
-    && export LC_ALL=C.UTF-8 \
-    && export LANG=C.UTF-8 \
-    && pipenv install --ignore-pipfile
-CMD ["./converter"]
+COPY --from=builder /converter/*.py ./
+COPY --from=builder /converter/pyproject.toml .
+COPY --from=builder /go/bin/converter /go/bin/converter
+RUN apt-get update \
+    && apt-get install curl \
+    && pip3 install poetry \
+    && poetry install
+EXPOSE 80
+CMD ["/go/bin/converter"]

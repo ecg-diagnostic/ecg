@@ -3,32 +3,29 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/golang/glog"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 )
 
 func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
-	preprocessCommand := exec.Command("python3", "preprocess.py")
-	preprocessCommand.Env = append(
-		preprocessCommand.Env,
-		fmt.Sprintf("floatPrecision=%d", p.floatPrecision),
-	)
-	preprocessCommand.Env = append(
-		preprocessCommand.Env,
-		fmt.Sprintf("lowerFrequencyBound=%d", p.lowerFrequencyBound),
-	)
-	preprocessCommand.Env = append(
-		preprocessCommand.Env,
-		fmt.Sprintf("sampleRate=%d", p.sampleRate),
-	)
-	preprocessCommand.Env = append(
-		preprocessCommand.Env,
-		fmt.Sprintf("upperFrequencyBound=%d", p.upperFrequencyBound),
-	)
+	glog.Infoln("preprocess")
 
-	stdin, err := preprocessCommand.StdinPipe()
+	glog.Infoln("poetry run python3 preprocess.py")
+	c := exec.Command("poetry", "run", "python3", "preprocess.py")
+
+	c.Env = append(c.Env, os.Environ()...)
+	c.Env = append(c.Env, fmt.Sprintf("floatPrecision=%d", p.floatPrecision))
+	c.Env = append(c.Env, fmt.Sprintf("lowerFrequencyBound=%d", p.lowerFrequencyBound))
+	c.Env = append(c.Env, fmt.Sprintf("sampleRate=%d", p.sampleRate))
+	c.Env = append(c.Env, fmt.Sprintf("upperFrequencyBound=%d", p.upperFrequencyBound))
+
+	glog.Infoln("pipe stdin to subprocess")
+	stdin, err := c.StdinPipe()
 	if err != nil {
+		glog.Errorln(err.Error())
 		return nil, err
 	}
 
@@ -37,11 +34,15 @@ func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
 		_, _ = stdin.Write(rawSignals)
 	}()
 
-	output, err := preprocessCommand.CombinedOutput()
+	glog.Infoln("wait combined output")
+	output, err := c.CombinedOutput()
 	if err != nil {
+		glog.Errorln(err.Error())
+		glog.Errorln(string(output))
 		return nil, errors.New(string(output))
 	}
 
+	glog.Infoln("preprocess end")
 	return output, nil
 }
 

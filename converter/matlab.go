@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"log"
+	"os"
 	"os/exec"
 )
 
@@ -11,10 +13,13 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 		return nil, nil
 	}
 
-	matlabCommand := exec.Command("pipenv", "run", "python3", "matlab.py")
+	log.Println("matlab parse started")
+	matlabCommand := exec.Command("poetry", "run", "python3", "matlab.py")
+	matlabCommand.Env = append(matlabCommand.Env, os.Environ()...)
 
 	stdin, err := matlabCommand.StdinPipe()
 	if err != nil {
+		log.Println("matlab command stdin pipe error:\n", err.Error())
 		return nil, err
 	}
 
@@ -25,9 +30,13 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 
 	output, err := matlabCommand.CombinedOutput()
 	if err != nil {
+		log.Println("matlab command combined output error")
+		log.Println("\toutput:", string(output))
+		log.Println("\terror:", err.Error())
 		return nil, errors.New(string(output))
 	}
 
+	log.Println("matlab parse finished")
 	return output, nil
 }
 

@@ -1,19 +1,19 @@
-FROM golang:alpine AS builder
+FROM golang:1.14-alpine AS builder
 WORKDIR /back
 COPY . .
 RUN apk update \
     && apk add git \
     && go get -d -v \
-    && go build -o /go/bin/back
+    && CGO_ENABLED=0 go build -o /go/bin/back
 
-FROM python:alpine
+FROM python:3.8
 WORKDIR /back
-COPY --from=builder /back .
-COPY --from=builder /go/bin/back .
-RUN apk update \
-    && apk add openblas-dev gfortran \
-    && pip3 install pipenv \
-    && export LC_ALL=C.UTF-8 \
-    && export LANG=C.UTF-8 \
-    && pipenv install --ignore-pipfile
-CMD ["./back"]
+COPY --from=builder /back/*.py ./
+COPY --from=builder /back/pyproject.toml .
+COPY --from=builder /go/bin/back /go/bin/back
+RUN apt-get update \
+    && apt-get install curl \
+    && pip3 install poetry \
+    && poetry install
+EXPOSE 80
+CMD ["/go/bin/back", "-logtostderr=true"]

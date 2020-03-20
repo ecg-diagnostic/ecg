@@ -3,11 +3,12 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
+	"github.com/golang/glog"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"io/ioutil"
-	"log"
 	"mime/multipart"
 	"net/http"
 )
@@ -15,6 +16,8 @@ import (
 var store = Store{tokenToEntry: make(map[Token]Entry)}
 
 func main() {
+	flag.Parse()
+
 	r := mux.NewRouter()
 	r.HandleFunc("/api/upload", handleUpload).Methods("POST")
 	r.HandleFunc("/api/{token}", handleGet).Methods("GET")
@@ -24,7 +27,7 @@ func main() {
 	var backAddr, listenAddr = GetBackAddr()
 	fmt.Printf("Backend listening %s\n", backAddr)
 	err := http.ListenAndServe(listenAddr, nil)
-	log.Fatal(err)
+	glog.Fatal(err)
 }
 
 func handleGet(w http.ResponseWriter, r *http.Request) {
@@ -126,44 +129,62 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
+	glog.Infoln("handle abnormalities")
+
 	token, ok := mux.Vars(r)["token"]
 	if !ok {
+		glog.Infoln("empty token")
 		http.Error(w, "empty token", http.StatusNotFound)
 		return
 	}
+
+	glog.Infoln("token", token)
+	glog.Infoln("load entry from store")
 
 	store.RLock()
 	entry, ok := store.tokenToEntry[Token(token)]
 	store.RUnlock()
 
 	if !ok {
-		http.Error(w, fmt.Sprintf("entry with token %s not found", token), http.StatusNotFound)
+		var message = fmt.Sprintf("entry with token %s not found", token)
+		glog.Error(message)
+		http.Error(w, message, http.StatusNotFound)
 		return
 	}
 
 	var modelAddr, _ = GetModelAddr()
+	modelAddr = fmt.Sprintf("%s/predict", modelAddr)
 	var contentType = "application/octet-stream"
 	var modelRequestBody = bytes.NewBuffer(entry.Signals)
 
+	glog.Infoln("send request to model")
 	modelResponse, err := http.Post(modelAddr, contentType, modelRequestBody)
 	defer modelResponse.Body.Close()
 
 	if err != nil {
+		glog.Errorln(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	glog.Infoln("read model response body")
 	modelResponseBody, err := ioutil.ReadAll(modelResponse.Body)
+
 	if err != nil {
+		glog.Errorln(err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if modelResponse.StatusCode != http.StatusOK {
+		glog.Errorln("model status code", modelResponse.StatusCode)
+		glog.Errorln("model response body\n", string(modelResponseBody))
 		http.Error(w, string(modelResponseBody), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(modelResponseBody)
+
+	glog.Infoln("handle abnormalities end")
 }
