@@ -3,12 +3,11 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"flag"
 	"fmt"
-	"github.com/golang/glog"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+	"log"
 	"mime/multipart"
 	"net/http"
 )
@@ -16,8 +15,6 @@ import (
 var store = Store{tokenToEntry: make(map[Token]Entry)}
 
 func main() {
-	flag.Parse()
-
 	r := mux.NewRouter()
 	r.HandleFunc("/api/upload", handleUpload).Methods("POST")
 	r.HandleFunc("/api/{token}", handleGet).Methods("GET")
@@ -25,59 +22,84 @@ func main() {
 	http.Handle("/", r)
 
 	var backAddr, listenAddr = GetBackAddr()
-	fmt.Printf("Backend listening %s\n", backAddr)
+	log.Println("backend listening", backAddr)
 	err := http.ListenAndServe(listenAddr, nil)
-	glog.Fatal(err)
+	log.Fatal(err)
 }
 
 func handleGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("handle get")
+
 	token, ok := mux.Vars(r)["token"]
 	if !ok {
+		log.Println("empty token")
 		http.Error(w, "empty token", http.StatusNotFound)
 		return
 	}
+
+	log.Println("load entry from store related to token", token)
 
 	store.RLock()
 	entry, ok := store.tokenToEntry[Token(token)]
 	store.RUnlock()
 
 	if !ok {
-		http.Error(w, fmt.Sprintf("entry with token %s not found", token), http.StatusNotFound)
+		var err = fmt.Errorf("entry related to token %s does not found", token)
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	preprocessParams, err := parsePreprocessParams(r)
+
 	if err != nil {
-		http.Error(w, fmt.Errorf("parse preprocess params: %w", err).Error(), http.StatusBadRequest)
+		var err = fmt.Errorf("parse preprocess params: %w", err)
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	signals, err := preprocess(entry.Signals, preprocessParams)
+
 	if err != nil {
-		http.Error(w, fmt.Errorf("preprocess: %w", err).Error(), http.StatusBadRequest)
+		var err = fmt.Errorf("preprocess: %w", err)
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	log.Println("send response to front")
 	w.Header().Set("Content-Type", "application/octet-stream")
 	_, _ = w.Write(signals)
 }
 
 func handleUpload(w http.ResponseWriter, r *http.Request) {
+	log.Println("handle upload")
+
+	log.Println("parse multipart form")
 	err := r.ParseMultipartForm(1_000_000)
+
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	log.Println("create converter multipart writer")
 	var converterRequestBody = new(bytes.Buffer)
 	var converterWriter = multipart.NewWriter(converterRequestBody)
 
 	for _, fileHeader := range r.MultipartForm.File["files[]"] {
+		log.Println("create part")
 		partWriter, err := converterWriter.CreatePart(fileHeader.Header)
+
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		log.Println("write file content to part")
 		file, _ := fileHeader.Open()
 		fileContent, _ := ioutil.ReadAll(file)
 		_, _ = partWriter.Write(fileContent)
@@ -88,67 +110,79 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	var converterAddr, _ = GetConverterAddr()
 	var contentType = converterWriter.FormDataContentType()
 
+	log.Println("post multipart to converter", converterAddr)
 	converterResponse, err := http.Post(converterAddr, contentType, converterRequestBody)
-	defer converterResponse.Body.Close()
 
 	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	defer converterResponse.Body.Close()
+
+	log.Println("read converter response body")
+	converterResponseBody, err := ioutil.ReadAll(converterResponse.Body)
+
+	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if converterResponse.StatusCode != http.StatusOK {
-		http.Error(w, "invalid file format", http.StatusBadRequest)
+		log.Println("converter status code", converterResponse.StatusCode)
+		log.Println("converter response body\n", string(converterResponseBody))
+		http.Error(w, "can't convert files", http.StatusBadRequest)
 		return
 	}
 
-	converterResponseBody, err := ioutil.ReadAll(converterResponse.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+	log.Println("create entry")
 	var entry = Entry{
 		Signals: converterResponseBody,
 	}
-
 	var token = Token(r.Form.Get("token"))
 
 	store.Lock()
 	if len(token) > 0 {
 		delete(store.tokenToEntry, token)
+		log.Println("token", token, "exists, remove related entry")
 	} else {
 		token = Token(uuid.New().String())
+		log.Println("create new token", token)
 	}
+	log.Println("save entry")
 	store.tokenToEntry[token] = entry
 	store.Unlock()
 
+	log.Println("create response")
 	response, _ := json.Marshal(TokenResponse{Token: token})
 
+	log.Println("send response to front")
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(response)
 }
 
 func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
-	glog.Infoln("handle abnormalities")
+	log.Println("handle abnormalities")
 
 	token, ok := mux.Vars(r)["token"]
 	if !ok {
-		glog.Infoln("empty token")
+		log.Println("empty token")
 		http.Error(w, "empty token", http.StatusNotFound)
 		return
 	}
 
-	glog.Infoln("token", token)
-	glog.Infoln("load entry from store")
+	log.Println("load entry from store related to token", token)
 
 	store.RLock()
 	entry, ok := store.tokenToEntry[Token(token)]
 	store.RUnlock()
 
 	if !ok {
-		var message = fmt.Sprintf("entry with token %s not found", token)
-		glog.Error(message)
-		http.Error(w, message, http.StatusNotFound)
+		var err = fmt.Errorf("entry related to token %s does not found", token)
+		log.Println(err)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
@@ -157,34 +191,38 @@ func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 	var contentType = "application/octet-stream"
 	var modelRequestBody = bytes.NewBuffer(entry.Signals)
 
-	glog.Infoln("send request to model")
+	log.Println("post signals to model", modelAddr)
 	modelResponse, err := http.Post(modelAddr, contentType, modelRequestBody)
-	defer modelResponse.Body.Close()
 
 	if err != nil {
-		glog.Errorln(err.Error())
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	glog.Infoln("read model response body")
+	defer modelResponse.Body.Close()
+
+	log.Println("read model response body")
 	modelResponseBody, err := ioutil.ReadAll(modelResponse.Body)
 
 	if err != nil {
-		glog.Errorln(err.Error())
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if modelResponse.StatusCode != http.StatusOK {
-		glog.Errorln("model status code", modelResponse.StatusCode)
-		glog.Errorln("model response body\n", string(modelResponseBody))
+		log.Println("model status code", modelResponse.StatusCode)
+		log.Println("model response body\n", string(modelResponseBody))
 		http.Error(w, string(modelResponseBody), http.StatusInternalServerError)
 		return
 	}
 
+	log.Println("send response to front")
 	w.Header().Set("Content-Type", "application/json")
 	_, _ = w.Write(modelResponseBody)
+}
 
-	glog.Infoln("handle abnormalities end")
+func init() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }

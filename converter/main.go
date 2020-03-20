@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,35 +13,41 @@ import (
 var parsers []func([]byte) ([]byte, error)
 
 func main() {
-	http.HandleFunc("/", handle)
+	r := mux.NewRouter()
+	r.HandleFunc("/", handleConvert).Methods("POST")
+	http.Handle("/", r)
 
 	var converterAddr, listenAddr = GetConverterAddr()
-	fmt.Printf("Converter listening %s\n", converterAddr)
+	log.Println("converter listening", converterAddr)
 	err := http.ListenAndServe(listenAddr, nil)
 	log.Fatal(err)
 }
 
-func handle(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "invalid method", http.StatusMethodNotAllowed)
-		return
-	}
+func handleConvert(w http.ResponseWriter, r *http.Request) {
+	log.Println("handle convert")
 
+	log.Println("parse content-type")
 	contentType, params, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if contentType != "multipart/form-data" {
+		log.Println(http.ErrNotMultipart)
 		http.Error(w, http.ErrNotMultipart.Error(), http.StatusBadRequest)
 		return
 	}
 
+	log.Println("create multipart reader")
 	multipartReader := multipart.NewReader(r.Body, params["boundary"])
 	defer r.Body.Close()
 
 	for {
+		log.Println("create part")
+
 		part, err := multipartReader.NextPart()
 		if err == io.EOF {
 			return
@@ -75,4 +81,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unknown file type", http.StatusNotFound)
 		return
 	}
+}
+
+func init() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lshortfile)
 }

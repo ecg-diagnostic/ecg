@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/golang/glog"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -11,9 +11,9 @@ import (
 )
 
 func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
-	glog.Infoln("preprocess")
+	log.Println("preprocess")
 
-	glog.Infoln("poetry run python3 preprocess.py")
+	log.Println("exec command: poetry run python3 preprocess.py")
 	c := exec.Command("poetry", "run", "python3", "preprocess.py")
 
 	c.Env = append(c.Env, os.Environ()...)
@@ -22,35 +22,41 @@ func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
 	c.Env = append(c.Env, fmt.Sprintf("sampleRate=%d", p.sampleRate))
 	c.Env = append(c.Env, fmt.Sprintf("upperFrequencyBound=%d", p.upperFrequencyBound))
 
-	glog.Infoln("pipe stdin to subprocess")
+	log.Println("pipe stdin to subprocess")
 	stdin, err := c.StdinPipe()
 	if err != nil {
-		glog.Errorln(err.Error())
+		log.Println(err)
 		return nil, err
 	}
 
 	go func() {
 		defer stdin.Close()
+		log.Println("write raw signals to pipe")
 		_, _ = stdin.Write(rawSignals)
 	}()
 
-	glog.Infoln("wait combined output")
+	log.Println("wait combined output")
 	output, err := c.CombinedOutput()
+
 	if err != nil {
-		glog.Errorln(err.Error())
-		glog.Errorln(string(output))
+		log.Println(err)
+		log.Println(string(output))
 		return nil, errors.New(string(output))
 	}
 
-	glog.Infoln("preprocess end")
 	return output, nil
 }
 
 func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
+	log.Println("parse preprocess params")
+
 	var params = preprocessParams{}
 
+	log.Println("parse form")
 	err := r.ParseForm()
+
 	if err != nil {
+		log.Println(err)
 		return params, err
 	}
 
@@ -63,7 +69,11 @@ func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
 }
 
 func parseParam(p *int, r *http.Request, key string) {
+	log.Println("parse param", key)
+
 	if param, err := strconv.Atoi(r.Form.Get(key)); err == nil {
 		*p = param
+	} else {
+		log.Println(err)
 	}
 }
