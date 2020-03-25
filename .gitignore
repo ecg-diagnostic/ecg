@@ -1,5 +1,6 @@
 # user
 .idea
+back/env
 converter/samples/*
 front/node_modules/*
 !converter/samples/.gitkeep

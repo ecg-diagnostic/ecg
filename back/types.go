@@ -3,14 +3,9 @@ package main
 import "sync"
 
 type Token string
-
-type Sex int
-type Age int
 type Signals []byte
 
 type Entry struct {
-	Age     Age
-	Sex     Sex
 	Signals Signals
 }
 

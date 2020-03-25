@@ -1,23 +1,18 @@
-FROM golang:latest
+FROM golang:1.14-alpine AS builder
+WORKDIR /back
+COPY . .
+RUN apk update \
+    && apk add git \
+    && go get -d -v \
+    && CGO_ENABLED=0 go build -o /go/bin/back
 
-WORKDIR /be-app
-#installing python and python dependencies:
-RUN apt-get update && apt-get install -y python3-pip libopenblas-dev gfortran
-
-COPY ./requirements.txt ./
-
-RUN pip3 install scipy
-RUN pip3 install -r requirements.txt
-
-COPY . /be-app
-
-# Build the Go app
-RUN go get github.com/google/uuid
-RUN go get github.com/gorilla/handlers
-RUN go get github.com/gorilla/mux
-RUN go build -o main .
-
-# Expose port 8001 to the outside world
-EXPOSE 8001
-
-CMD ["./main"]
+FROM python:3.8
+WORKDIR /back
+COPY --from=builder /back/*.py ./
+COPY --from=builder /back/poetry.lock .
+COPY --from=builder /back/pyproject.toml .
+COPY --from=builder /go/bin/back /go/bin/back
+RUN apt-get update \
+    && pip3 install poetry \
+    && poetry install
+CMD ["/go/bin/back", "-logtostderr=true"]

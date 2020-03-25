@@ -1,20 +1,18 @@
-FROM golang:latest
+FROM golang:1.14-alpine AS builder
+WORKDIR /converter
+COPY . .
+RUN apk update \
+    && apk add git \
+    && go get -d -v \
+    && CGO_ENABLED=0 go build -o /go/bin/converter
 
-WORKDIR /converter-app
-#installing python and python dependencies:
-RUN apt-get update && apt-get install -y python3-pip libopenblas-dev gfortran
-
-COPY ./requirements.txt ./
-
-RUN pip3 install scipy
-RUN pip3 install -r requirements.txt
-
-COPY . /converter-app
-
-# Build the Go app
-RUN go build -o main .
-
-# Expose port 8002 to the outside world
-EXPOSE 8002
-
-CMD ["./main"]
+FROM python:3.8
+WORKDIR /converter
+COPY --from=builder /converter/*.py ./
+COPY --from=builder /converter/poetry.lock .
+COPY --from=builder /converter/pyproject.toml .
+COPY --from=builder /go/bin/converter /go/bin/converter
+RUN apt-get update \
+    && pip3 install poetry \
+    && poetry install
+CMD ["/go/bin/converter", "-logtostderr=true"]

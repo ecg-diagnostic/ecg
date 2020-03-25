@@ -2,22 +2,24 @@ version: "3.1"
 
 services:
   front:
-    image: lashby8/ecg-fe:latest
+    image: front:latest
     restart: always
     ports:
       - "80:80"
   back:
-    image: lashby8/ecg-be:latest
+    image: back:latest
     restart: always
-    ports:
-      - "8001:8001"
+    env_file:
+      - ".env"
   converter:
-    image: lashby8/ecg-converter:latest
+    image: converter:latest
     restart: always
-    ports:
-      - "8002:8002"
+    env_file:
+      - ".env"
   model:
     image: lashby8/ecg-model:latest
     restart: always
+    env_file:
+      - ".env"
     ports:
       - "8003:8003"
