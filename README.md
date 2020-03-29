@@ -25,8 +25,8 @@ Project based on microservice architecture, main entitites:
   
 Developers:
 - [Антонов Дмитрий](https://github.com/Lashby8)
-- Рябикин Николай  
+- [Рябикин Николай](https://github.com/ryabsky)  
 - [Хлевнов Олег](https://github.com/khlevnov)  
-- Чуркин Андрей
+- [Чуркин Андрей](https://github.com/2-71-churkin)
   
 ## Licence
