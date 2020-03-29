@@ -15,7 +15,7 @@ jobs:
         env:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+        run: echo '$DOCKER_PASSWORD' | docker login --username $DOCKER_USERNAME --password-stdin
       - name: Building Docker Image
         env:
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
