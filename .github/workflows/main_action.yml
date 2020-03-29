@@ -13,9 +13,6 @@ jobs:
     steps:
       - name: Docker Registry
         env:
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-#         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
           run:
             ls -la
       - name: Building Docker Image
