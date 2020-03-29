@@ -14,9 +14,8 @@ jobs:
       - name: Docker Registry
         env:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
       - name: Building Docker Image
         env:
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
