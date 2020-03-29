@@ -1,6 +1,8 @@
 # ECG Disease Classification
 ### Приложение для предсказания заболеваний по электрокардиограмме
 
+![Docker Image CI](https://github.com/ecg-diagnostic/ecg/workflows/Docker%20Image%20CI/badge.svg?branch=master)
+
 ## Description
 ML Engineering Practice Project, YSDA, Nizhny Novgorod, 2020
 ## Features
