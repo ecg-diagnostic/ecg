@@ -12,9 +12,8 @@ jobs:
     name: App Dockerization
     steps:
       - name: Docker Registry
-        env:
-          run:
-            ls -la
+        run:
+          ls -la
       - name: Building Docker Image
         env:
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
