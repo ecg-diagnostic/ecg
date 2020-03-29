@@ -9,12 +9,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: A job to say hello
+    name: App Dockerization
     steps:
-    - name: Hello world action step
-      id: hello
-      uses: actions/hello-world-docker-action@v1
-      with:
-        who-to-greet: 'Test Name'
-    - name: Get the output time
-      run: echo "The time was ${{ steps.hello.outputs.time }}"
+      - name: Docker Registry
+        env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD $DOCKER_REGISTRY_URL
+      - name: Building Docker Image
+        env:
+          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
+          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
+        run:
+          docker build --no-cache -t $DOCKER_REGISTRY_URL/$CONTAINER_IMAGE_NAME:latest ./front
+      - name: Push Docker Container to Registry
+        env:
+          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME }}
+          DOCKER_REGISTRY_URL: ${{ secrets.DOCKER_REGISTRY_URL }}
+        run: docker push $DOCKER_REGISTRY_URL/$CONTAINER_IMAGE_NAME:latest
