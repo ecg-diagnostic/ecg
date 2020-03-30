@@ -22,7 +22,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
         run:
-          docker build --no-cache -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./front/
+          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./front/
       - name: Push Docker Container FE to Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -34,7 +34,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
         run:
-          docker build --no-cache -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./back/
+          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./back/
       - name: Push Docker Container BE to Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -46,7 +46,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
         run:
-          docker build --no-cache -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./converter/
+          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./converter/
       - name: Push Docker Container Converter to Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -58,7 +58,7 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
         run:
-          docker build --no-cache -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
+          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
       - name: Push Docker Container Model to Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
