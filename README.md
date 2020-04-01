@@ -12,6 +12,7 @@ Project based on microservice architecture, main entitites:
 - Backend
 - Photo to signal encoder (ML)
 - Disease Classification by ECG (ML)
+
 ## Installation
 - Frontend
 - Backend
