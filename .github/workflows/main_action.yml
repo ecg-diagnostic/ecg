@@ -23,4 +23,4 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           PORT: ${{ secrets.PORT }}
-        run:  sudo mkdir ~/.ssh && sudo touch ~/.ssh/id_rsa && sudo echo $SSH_PRIVATE_KEY >> ~/.ssh/id_rsa && ssh -p $PORT $USERNAME@$HOST_NAME ls -la
+        run:  mkdir ~/.ssh && touch ~/.ssh/id_rsa && echo $SSH_PRIVATE_KEY >> ~/.ssh/id_rsa && ssh -p $PORT $USERNAME@$HOST_NAME ls -la
