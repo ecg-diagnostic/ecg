@@ -27,4 +27,5 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
         run: |
+          ssh-keyscan 84.201.145.151 >> ~/.ssh/known_hosts
           ssh -p $PORT $USERNAME@$HOST_NAME ls -la
