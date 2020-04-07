@@ -26,10 +26,10 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run:  |
           mkdir ~/.ssh 
-          touch ~/.ssh/id_rsa
-          echo $SSH_PRIVATE_KEY >> ~/.ssh/id_rsa
-          echo $SSH_PUBLIC_KEY >> ~/.ssh/id_rsa.pub
+          echo $SSH_PRIVATE_KEY > ~/.ssh/id_rsa
+          echo $SSH_PUBLIC_KEY > ~/.ssh/id_rsa.pub
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/id_rsa.pub
+          ssh-keyscan github.com > ~/.ssh/known_hosts
+          ssh-keyscan $HOST_NAME > ~/.ssh/known_hosts
           ssh -p $PORT $USERNAME@$HOST_NAME ls -la
