@@ -22,5 +22,6 @@ jobs:
           HOST_NAME: ${{ secrets.HOST_NAME }}
           USERNAME: ${{ secrets.USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
           PORT: ${{ secrets.PORT }}
-        run:  mkdir ~/.ssh && touch ~/.ssh/id_rsa && echo $SSH_PRIVATE_KEY >> ~/.ssh/id_rsa && ssh -p $PORT $USERNAME@$HOST_NAME ls -la
+        run:  mkdir ~/.ssh && touch ~/.ssh/id_rsa && echo $SSH_PRIVATE_KEY >> ~/.ssh/id_rsa && echo $SSH_PUBLIC_KEY >> ~/.ssh/id_rsa.pub && ssh -p $PORT $USERNAME@$HOST_NAME ls -la
