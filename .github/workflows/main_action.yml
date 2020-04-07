@@ -17,51 +17,11 @@ jobs:
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-      - name: Building Docker Image FE
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./front/
-      - name: Push Docker Container FE to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-        
-      - name: Building Docker Image BE
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./back/
-      - name: Push Docker Container BE to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-        
-      - name: Building Docker Image Converter
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./converter/
-      - name: Push Docker Container Converter to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-        
-      - name: Building Docker Image Model
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
-      - name: Push Docker Container Model to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-
+      - name: SSH Commands
+        uses: appleboy/ssh-action@v0.0.2
+        with:
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: ls -la
