@@ -32,4 +32,5 @@ jobs:
           chmod 600 ~/.ssh/id_rsa.pub
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
+          sed -i -e "s#\\\\n#\n#g" ~/.ssh/id_rsa
           ssh -p $PORT $USERNAME@$HOST_NAME ls -la
