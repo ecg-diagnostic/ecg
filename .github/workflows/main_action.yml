@@ -18,15 +18,9 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
       - name: SSH Commands
-        uses: appleboy/ssh-action@v0.0.2
         env:
           HOST_NAME: ${{ secrets.HOST_NAME }}
           USERNAME: ${{ secrets.USERNAME }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           PORT: ${{ secrets.PORT }}
-        with:
-          host: $HOST_NAME
-          username: $USERNAME
-          key: $SSH_PRIVATE_KEY
-          port: $PORT
-          script: ls -la
+        run:  sudo echo $SSH_PRIVATE_KEY >> ~/.ssh/id_rsa && ssh -p $PORT $USERNAME@$HOST_NAME ls -la
