@@ -21,12 +21,12 @@ jobs:
     - name: Get dependencies, Build, Run Tests for back
       run: | 
         cd ./back
-        go get -d -v
+        go get -d -v -t
         go build .
         go test -cover .
     - name: Get dependencies, Build, Run Tests for converter
       run: | 
         cd ./converter
-        go get -d -v
+        go get -d -v -t
         go build .
         go test -cover .
