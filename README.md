@@ -5,7 +5,6 @@
 ![Unit Tests](https://github.com/ecg-diagnostic/ecg/workflows/Unit%20Tests/badge.svg?branch=master)
 ## Description
 ML Engineering Practice Project, YSDA, Nizhny Novgorod, 2020
-## Features
 ## Project Structure
 Project based on microservice architecture, main entitites:
 - Frontend
