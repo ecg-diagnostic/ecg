@@ -14,6 +14,7 @@ Project based on microservice architecture, main entitites:
 
 ## Installation
 Для простого поднятия всех компонентов приложения достаточно выполнить:
+
 `sudo docker-compose up`
 
 Поднимутся следующие 4 докер-образа
