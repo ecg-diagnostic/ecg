@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Install G
+    name: Install Golang
     runs-on: ubuntu-latest
     steps:
     - name: Set up Go 1.13
@@ -18,10 +18,14 @@ jobs:
       id: go
       
     - name: Get dependencies, Build, Run Tests for back
-      uses: actions/checkout@v2
-    - name: Testing
       run: | 
         cd ./back
+        go get -d -v
+        go build .
+        go test -cover .
+    - name: Get dependencies, Build, Run Tests for converter
+      run: | 
+        cd ./converter
         go get -d -v
         go build .
         go test -cover .
