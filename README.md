@@ -14,11 +14,16 @@ Project based on microservice architecture, main entitites:
 - Disease Classification by ECG (ML)
 
 ## Installation
+Для простого поднятия всех компонентов приложения достаточно выполнить:
+`sudo docker-compose up`
+
+Поднимутся следующие 4 докер-образа
 - Frontend
 - Backend
 - Photo to signal encoder (ML)
 - Disease Classification by ECG (ML)
 
+Для запуска каждого модуля отдельно следует смотреть в README.md конкретного модуля
 ## Team
 
 Куратор:  
