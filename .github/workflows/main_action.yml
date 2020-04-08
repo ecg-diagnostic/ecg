@@ -3,8 +3,6 @@ name: Docker Images CI
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 jobs:
   build:
@@ -21,14 +19,16 @@ jobs:
         uses: webfactory/ssh-agent@v0.1.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - name: Connect to remote VM, pull new images and up them
+      - name: Connect to remote vm
         env:
           HOST_NAME: ${{ secrets.HOST_NAME }}
           USERNAME: ${{ secrets.USERNAME }}
           PORT: ${{ secrets.PORT }}
-          run: |
-            ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-            ssh -p $PORT $USERNAME@$HOST_NAME ls -la
+        run: |
+          ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
+          ssh -p $PORT $USERNAME@$HOST_NAME
+          cd /ecg
+          ls -la
 #      - name: Building Docker Image FE
 #        env:
 #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
