@@ -26,7 +26,7 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: |
           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-          ssh $PORT $USERNAME@$HOST_NAME cd /ecg && ls -la && docker-compose stop
+          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && ls -la && docker-compose stop
 #      - name: Building Docker Image FE
 #        env:
 #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
