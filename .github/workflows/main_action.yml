@@ -18,17 +18,17 @@ jobs:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
       - name: Install SSH key
-          uses: webfactory/ssh-agent@v0.1.1
-          with:
-            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-            - name: Connect to remote VM, pull new images and up them
-              env:
-                HOST_NAME: ${{ secrets.HOST_NAME }}
-                USERNAME: ${{ secrets.USERNAME }}
-                PORT: ${{ secrets.PORT }}
-              run: |
-                ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-                ssh -p $PORT $USERNAME@$HOST_NAME ls -la
+        uses: webfactory/ssh-agent@v0.1.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Connect to remote VM, pull new images and up them
+        env:
+          HOST_NAME: ${{ secrets.HOST_NAME }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PORT: ${{ secrets.PORT }}
+          run: |
+            ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
+            ssh -p $PORT $USERNAME@$HOST_NAME ls -la
 #      - name: Building Docker Image FE
 #        env:
 #          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
