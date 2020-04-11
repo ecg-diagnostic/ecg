@@ -135,11 +135,6 @@ def get_signal_from_image_array(img, sec_per_cell = 0.2, px_per_sec = 500, mvolt
             graph_points[i] = get_fixed_vector(valid_means, graph_points[i])
 
     graphs = np.array(graph_points)
-    
-    plt.figure(figsize = (20,10))
-    plt.plot(graphs)
-    plt.show()
-    
     graphs_normalized = (graphs - graphs.T.mean(axis=1)).T
 
     cell_size = get_cell_size(img)
