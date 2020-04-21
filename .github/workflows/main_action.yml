@@ -50,7 +50,7 @@ jobs:
 #        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
 #
 #      - name: Install SSH key
-#        uses: webfactory/ssh-agent@v0.1.1
+#        uses: g@v0.1.1
 #        with:
 #          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Pull new docker-images and rerun app
