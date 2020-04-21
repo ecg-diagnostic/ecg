@@ -60,4 +60,4 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: |
           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && git fetch --all && git reset --hard origin/master && docker-compose pull && docker-compose stop && docker-compose up -d
+          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && sudo docker-compose stop
