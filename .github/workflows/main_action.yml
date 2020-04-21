@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: App Dockerization
     steps:
-#      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 #      - uses: whoan/docker-build-with-cache-action@v5
 #        with:
 #          username: "${{ secrets.DOCKER_USERNAME }}"
@@ -49,11 +49,10 @@ jobs:
 #          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
 #        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
 #
-#      - name: Install SSH key
-#        uses: webfactory/ssh-agent@v0.1.1
-#        with:
-#          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-      - uses: actions/checkout@v2
+      - name: Install SSH key
+        uses: webfactory/ssh-agent@v0.1.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Pull new docker-images and rerun app
         env:
           HOST_NAME: ${{ secrets.HOST_NAME }}
