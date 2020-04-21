@@ -15,7 +15,8 @@ jobs:
           username: "${{ secrets.DOCKER_USERNAME }}"
           password: "${{ secrets.DOCKER_PASSWORD }}"
           image_name: "${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_IMAGE_NAME_FE }}"
-          dockerfile: front/Dockerfile
+          context:  /front/
+          dockerfile: /front/Dockerfile
 #       - name: Building Docker Image FE
 #         env:
 #           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
