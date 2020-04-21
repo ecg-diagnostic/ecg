@@ -29,12 +29,20 @@ jobs:
           image_name: "${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}"
           context:  ./converter/
 
-      - name: Building Docker Image Model
+      - uses: actions/checkout@v2
+      - name: Docker Registry
         env:
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
+        run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
+
+      - name: Building Docker Image Model
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
+      run:
+        docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
+        - 
       - name: Push Docker Container Model to Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
