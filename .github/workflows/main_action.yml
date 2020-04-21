@@ -28,12 +28,18 @@ jobs:
           password: "${{ secrets.DOCKER_PASSWORD }}"
           image_name: "${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}"
           context:  ./converter/
-      - uses: whoan/docker-build-with-cache-action@v5
-        with:
-          username: "${{ secrets.DOCKER_USERNAME }}"
-          password: "${{ secrets.DOCKER_PASSWORD }}"
-          image_name: "${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}"
-          context:  ./model/
+
+      - name: Building Docker Image Model
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
+        run:
+          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
+      - name: Push Docker Container Model to Registry
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
+        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
 
       - name: Install SSH key
         uses: webfactory/ssh-agent@v0.1.1
@@ -47,4 +53,4 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: |
           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && git fetch --all && git reset --hard origin/master && docker-compose pull && docker-compose stop && docker-compose up -d && docker image prune -f
+          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && git fetch --all && git reset --hard origin/master && docker-compose pull && docker-compose stop && docker-compose up -d
