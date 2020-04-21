@@ -71,5 +71,9 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd /ecg
+            git fetch --all
+            git reset --hard origin/master
+            echo ${{ secrets.PASSWORD }} | sudo -S docker-compose pull
             echo ${{ secrets.PASSWORD }} | sudo -S docker-compose stop
-
+            echo ${{ secrets.PASSWORD }} | sudo -S docker-compose up -d
+            echo ${{ secrets.PASSWORD }} | sudo -S docker image prune -f
