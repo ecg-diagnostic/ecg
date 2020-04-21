@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: App Dockerization
     steps:
+      - name: Building Docker Image FE
       - uses: actions/checkout@v2
       - uses: whoan/docker-build-with-cache-action@v5
         with:
