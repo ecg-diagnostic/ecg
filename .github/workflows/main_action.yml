@@ -37,12 +37,13 @@ jobs:
         run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
 
       - name: Building Docker Image Model
-      env:
-        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
-      run:
-        docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
-        - 
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
+        run:
+          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
+          - 
+            
       - name: Push Docker Container Model to Registry
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
