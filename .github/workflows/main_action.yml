@@ -71,4 +71,4 @@ jobs:
           port: ${{ secrets.PORT }}
           script: |
             cd /ecg
-            sudo docker-compose stop
+            docker-compose stop
