@@ -56,8 +56,18 @@ jobs:
       - name: Pull new docker-images and rerun app
         env:
           HOST_NAME: ${{ secrets.HOST_NAME }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PORT: ${{ secrets.PORT }}
+#          USERNAME: ${{ secrets.USERNAME }}
+#          PORT: ${{ secrets.PORT }}
         run: |
           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && sudo docker-compose stop
+#          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && sudo docker-compose stop
+      - name: Trying ssh-action
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_NAME }}
+          username: ${{ secrets.USERNAME }}
+          key_path: ~/.ssh/known_hosts
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /ecg
+            sudo docker-compose stop
