@@ -70,5 +70,6 @@ jobs:
 #          key_path: ~/.ssh/id_rsa
           port: ${{ secrets.PORT }}
           script: |
+            ls -la
             cd /ecg
             docker-compose stop
