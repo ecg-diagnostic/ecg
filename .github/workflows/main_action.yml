@@ -66,7 +66,7 @@ jobs:
         with:
           host: ${{ secrets.HOST_NAME }}
           username: ${{ secrets.USERNAME }}
-          key_path: /.ssh/known_hosts
+          key_path: /.ssh/id_rsa
           port: ${{ secrets.PORT }}
           script: |
             cd /ecg
