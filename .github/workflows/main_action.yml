@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: App Dockerization
     steps:
-#      - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 #      - uses: whoan/docker-build-with-cache-action@v5
 #        with:
 #          username: "${{ secrets.DOCKER_USERNAME }}"
@@ -61,4 +61,4 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: |
           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg docker-compose stop
+          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && git fetch --all && git reset --hard origin/master && docker-compose pull && docker-compose stop && docker-compose up -d
