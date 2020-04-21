@@ -9,71 +9,71 @@ jobs:
     runs-on: ubuntu-latest
     name: App Dockerization
     steps:
-      - uses: actions/checkout@v2
-      - name: Docker Registry
-        env:
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
-
-      - name: Building Docker Image FE
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./front/
-      - name: Push Docker Container FE to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-
-      - name: Building Docker Image BE
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./back/
-      - name: Push Docker Container BE to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-
-      - name: Building Docker Image Converter
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./converter/
-      - name: Push Docker Container Converter to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-
-      - name: Building Docker Image Model
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
-        run:
-          docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
-      - name: Push Docker Container Model to Registry
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
-        run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
-
-      - name: Install SSH key
-        uses: webfactory/ssh-agent@v0.1.1
+      - uses: whoan/docker-build-with-cache-action@v5
         with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          username: "${{ secrets.DOCKER_USERNAME }}"
+          password: "${{ secrets.DOCKER_PASSWORD }}"
+          image_name: "${{ secrets.DOCKER_USERNAME }}/${{ secrets.CONTAINER_IMAGE_NAME_FE }}"
+          dockerfile: ./front/Dockerfile
 
-      - name: Pull new docker-images and rerun app
-        env:
-          HOST_NAME: ${{ secrets.HOST_NAME }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PORT: ${{ secrets.PORT }}
-        run: |
-          ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
-          ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && git fetch --all && git reset --hard origin/master && docker-compose pull && docker-compose stop && docker-compose up -d && docker image prune -f
+#       - name: Building Docker Image FE
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
+#         run:
+#           docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./front/
+#       - name: Push Docker Container FE to Registry
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_FE }}
+#         run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
+
+#       - name: Building Docker Image BE
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
+#         run:
+#           docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./back/
+#       - name: Push Docker Container BE to Registry
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_BE }}
+#         run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
+
+#       - name: Building Docker Image Converter
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
+#         run:
+#           docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./converter/
+#       - name: Push Docker Container Converter to Registry
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_CONVERTER }}
+#         run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
+
+#       - name: Building Docker Image Model
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
+#         run:
+#           docker build -t $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest ./model/
+#       - name: Push Docker Container Model to Registry
+#         env:
+#           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+#           CONTAINER_IMAGE_NAME: ${{ secrets.CONTAINER_IMAGE_NAME_MODEL }}
+#         run: docker push $DOCKER_USERNAME/$CONTAINER_IMAGE_NAME:latest
+
+#       - name: Install SSH key
+#         uses: webfactory/ssh-agent@v0.1.1
+#         with:
+#           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+#       - name: Pull new docker-images and rerun app
+#         env:
+#           HOST_NAME: ${{ secrets.HOST_NAME }}
+#           USERNAME: ${{ secrets.USERNAME }}
+#           PORT: ${{ secrets.PORT }}
+#         run: |
+#           ssh-keyscan $HOST_NAME >> ~/.ssh/known_hosts
+#           ssh -p  $PORT $USERNAME@$HOST_NAME cd /ecg && git fetch --all && git reset --hard origin/master && docker-compose pull && docker-compose stop && docker-compose up -d && docker image prune -f
