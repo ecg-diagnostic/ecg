@@ -2,7 +2,7 @@ import React from 'react'
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons'
 import { AbnormalitiesScreen } from '../Abnormalities'
-import { UploadScreen } from '../UploadScreen'
+import { FileUploadView } from '../FileUploadView'
 import { PlotScreen } from '../PlotScreen'
 import './App.css'
 
@@ -13,7 +13,7 @@ function App() {
         <BrowserRouter>
             <Switch>
                 <Route exact path="/">
-                    <UploadScreen />
+                    <FileUploadView />
                 </Route>
                 <Route exact path="/plot">
                     <PlotScreen />
