@@ -1,1 +1,0 @@
-export { UploadScreen } from './UploadScreen'

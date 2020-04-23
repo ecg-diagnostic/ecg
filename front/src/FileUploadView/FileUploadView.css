@@ -1,0 +1,83 @@
+.view {
+    align-items: center;
+    background-image: url('https://www.floridamedicalclinic.com/wp-content/uploads/2016/04/iStock-1013714512.jpg');
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    min-height: 100%;
+    padding: 1rem;
+}
+
+.view__panel {
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.132), 0 0 1px 0 rgba(0, 0, 0, 0.108);
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.file-upload-view__title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 39px;
+}
+
+.samples-buttons {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.samples-buttons__item,
+.samples-buttons__item > * {
+    width: 100%;
+}
+
+.samples-buttons__item:not(:last-child) {
+    padding-bottom: 6px;
+}
+
+.file-upload-view__upload > * {
+    width: 100%;
+}
+
+.file-upload-view__upload > * .ms-Button-icon {
+    display: none;
+}
+
+@media (min-width: 481px) {
+    .file-upload-view__upload > * {
+        width: auto;
+    }
+
+    .file-upload-view__upload > * .ms-Button-icon{
+        display: inline-block;
+    }
+
+    .view__panel {
+        font-size: 16px;
+        padding: 2rem 4rem;
+        width: 480px;
+    }
+}
+
+@media screen and (min-width: 641px) {
+    .samples-buttons__item {
+        padding-left: 3px;
+        padding-right: 3px;
+        flex-basis: 33%;
+    }
+
+    .samples-buttons__item:nth-child(3n + 1) {
+        padding-left: 0;
+    }
+
+    .samples-buttons__item:nth-child(3n + 3) {
+        padding-right: 0;
+    }
+
+    .view__panel {
+        width: 640px;
+    }
+}
