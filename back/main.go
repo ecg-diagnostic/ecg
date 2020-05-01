@@ -6,28 +6,169 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"io"
 	"io/ioutil"
 	"log"
 	"mime/multipart"
 	"net/http"
+	"net/textproto"
+	"os"
+	"path"
+	"sync"
 )
+
+type Token string
+type Signals []byte
+
+type Entry struct {
+	Signals Signals
+}
+
+func NewEntry(signals Signals) *Entry {
+	return &Entry{
+		Signals: signals,
+	}
+}
+
+type Store struct {
+	sync.RWMutex
+	tokenToEntry map[Token]Entry
+}
+
+type preprocessParams struct {
+	floatPrecision      int
+	lowerFrequencyBound int
+	sampleRate          int
+	upperFrequencyBound int
+}
+
+type TokenResponse struct {
+	Token Token `json:"token"`
+}
 
 var store = Store{tokenToEntry: make(map[Token]Entry)}
 
+func handler(next func(w http.ResponseWriter, r *http.Request) (int, error)) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		status, err := next(w, r)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, err.Error(), status)
+			return
+		}
+	}
+}
+
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/api/upload", handleUpload).Methods("POST")
-	r.HandleFunc("/api/{token}", handleGet).Methods("GET")
-	r.HandleFunc("/api/{token}/abnormalities", handleGetAbnormalities).Methods("GET")
-	http.Handle("/", r)
+	router := mux.NewRouter()
+	router.Path("/api/presets/{class}").Methods(http.MethodGet).HandlerFunc(handler(presetHandler))
+	router.Path("/api/upload").Methods(http.MethodPost).HandlerFunc(HandleUpload)
+	router.Path("/api/{token}").Methods(http.MethodGet).HandlerFunc(HandleGet)
+	router.Path("/api/{token}/abnormalities").Methods(http.MethodGet).HandlerFunc(HandleGetAbnormalities)
 
 	var backAddr, listenAddr = GetBackAddr()
 	log.Println("backend listening", backAddr)
-	err := http.ListenAndServe(listenAddr, nil)
+	err := http.ListenAndServe(listenAddr, router)
 	log.Fatal(err)
 }
 
-func handleGet(w http.ResponseWriter, r *http.Request) {
+func toConverter(multipartBody *bytes.Buffer, multipartWriter *multipart.Writer) (int, error, []byte) {
+	converterAddr, _ := GetConverterAddr()
+	contentType := multipartWriter.FormDataContentType()
+
+	response, err := http.Post(converterAddr, contentType, multipartBody)
+	if err != nil {
+		return http.StatusBadRequest, err, nil
+	}
+	defer response.Body.Close()
+	log.Println("sent request with multipart/form-data to converter at ", converterAddr)
+
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return http.StatusBadRequest, err, nil
+	}
+
+	if response.StatusCode != http.StatusOK {
+		return response.StatusCode, fmt.Errorf("converter response: %s\n%s", response.Status, body), nil
+	}
+	log.Println("converter response status:", response.Status)
+
+	return http.StatusOK, nil, body
+}
+
+func writeToken(w http.ResponseWriter, token Token)  {
+	response, _ := json.Marshal(TokenResponse{Token: token})
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write(response)
+
+	log.Println("sent response to front")
+}
+
+func presetHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+	log.Println("handle preset")
+
+	class, ok := mux.Vars(r)["class"]
+	if !ok {
+		return http.StatusNotFound, fmt.Errorf("failed to found 'class' param in url.Path")
+	}
+
+	classToPresetFileName := map[string]string{
+		"1": "A1957.mat",
+		"2": "A1973.mat",
+		"3": "A1974.mat",
+		"4": "A2065.mat",
+		"5": "A1966.mat",
+		"6": "A1980.mat",
+		"7": "A0005.mat",
+		"8": "A0014.mat",
+		"9": "A1960.mat",
+	}
+
+	presetFileName, ok := classToPresetFileName[class]
+	if !ok {
+		return http.StatusNotFound, fmt.Errorf("invalid preset class: %s", class)
+	}
+
+	presetFilePath := path.Join("presets", presetFileName)
+	f, err := os.Open(presetFilePath)
+	if err != nil {
+		return http.StatusInternalServerError, fmt.Errorf("failed to open %s", presetFilePath)
+	}
+	log.Println("opened " + presetFilePath)
+
+	requestBody := &bytes.Buffer{}
+	multipartWriter := multipart.NewWriter(requestBody)
+
+	partWriter, err := multipartWriter.CreatePart(textproto.MIMEHeader{})
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	_, err = io.Copy(partWriter, f)
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	err = multipartWriter.Close()
+	if err != nil {
+		return http.StatusInternalServerError, err
+	}
+
+	status, err, signals := toConverter(requestBody, multipartWriter)
+	if err != nil {
+		return status, err
+	}
+
+	store.Lock()
+	token := Token(class)
+	store.tokenToEntry[token] = *NewEntry(signals)
+	store.Unlock()
+
+	writeToken(w, token)
+	return http.StatusOK, nil
+}
+
+func HandleGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("handle get")
 
 	token, ok := mux.Vars(r)["token"]
@@ -73,7 +214,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(signals)
 }
 
-func handleUpload(w http.ResponseWriter, r *http.Request) {
+func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	log.Println("handle upload")
 
 	log.Println("parse multipart form")
@@ -86,12 +227,12 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Println("create converter multipart writer")
-	var converterRequestBody = new(bytes.Buffer)
-	var converterWriter = multipart.NewWriter(converterRequestBody)
+	requestBody := &bytes.Buffer{}
+	multipartWriter := multipart.NewWriter(requestBody)
 
 	for _, fileHeader := range r.MultipartForm.File["files[]"] {
 		log.Println("create part")
-		partWriter, err := converterWriter.CreatePart(fileHeader.Header)
+		partWriter, err := multipartWriter.CreatePart(fileHeader.Header)
 
 		if err != nil {
 			log.Println(err)
@@ -105,43 +246,17 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		_, _ = partWriter.Write(fileContent)
 	}
 
-	_ = converterWriter.Close()
+	_ = multipartWriter.Close()
 
-	var converterAddr, _ = GetConverterAddr()
-	var contentType = converterWriter.FormDataContentType()
-
-	log.Println("post multipart to converter", converterAddr)
-	converterResponse, err := http.Post(converterAddr, contentType, converterRequestBody)
-
+	status, err, signals := toConverter(requestBody, multipartWriter)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	defer converterResponse.Body.Close()
-
-	log.Println("read converter response body")
-	converterResponseBody, err := ioutil.ReadAll(converterResponse.Body)
-
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if converterResponse.StatusCode != http.StatusOK {
-		log.Println("converter status code", converterResponse.StatusCode)
-		log.Println("converter response body\n", string(converterResponseBody))
-		http.Error(w, "can't convert files", http.StatusBadRequest)
+		http.Error(w, err.Error(), status)
 		return
 	}
 
 	log.Println("create entry")
-	var entry = Entry{
-		Signals: converterResponseBody,
-	}
-	var token = Token(r.Form.Get("token"))
+	token := Token(r.Form.Get("token"))
 
 	store.Lock()
 	if len(token) > 0 {
@@ -152,7 +267,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		log.Println("create new token", token)
 	}
 	log.Println("save entry")
-	store.tokenToEntry[token] = entry
+	store.tokenToEntry[token] = *NewEntry(signals)
 	store.Unlock()
 
 	log.Println("create response")
@@ -163,7 +278,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(response)
 }
 
-func handleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
+func HandleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
 	log.Println("handle abnormalities")
 
 	token, ok := mux.Vars(r)["token"]

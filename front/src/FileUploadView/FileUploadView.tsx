@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom'
 import { setToken } from '../App/events'
 import './FileUploadView.css'
 import { DefaultButton, PrimaryButton, Toggle } from 'office-ui-fabric-react'
+import { nameToPreset } from './presets'
 
 function FileUploadView() {
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -58,6 +59,23 @@ function FileUploadView() {
         setSamplesButtons(!showSamplesButtons)
     }
 
+    function handlePresetClick(preset: number) {
+        fetch(`/api/presets/${preset}`)
+            .then(response => {
+                if (response.ok) {
+                    return response.json()
+                }
+                throw new Error(
+                    `fetch error: ${response.status} ${response.statusText}`,
+                )
+            })
+            .then(response => {
+                setToken(response.token)
+                history.push('/plot')
+            })
+            .catch(error => console.error(error))
+    }
+
     return (
         <div className="view file-upload-view">
             <div className="view__panel">
@@ -99,33 +117,14 @@ function FileUploadView() {
                 />
                 {showSamplesButtons && (
                     <div className="samples-buttons">
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="ЭКГ в норме " />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="ФП" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="I-AVB" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="LBBB" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="RBBB" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="PAC" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="PVC" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="STD" />
-                        </div>
-                        <div className="samples-buttons__item">
-                            <DefaultButton text="STE" />
-                        </div>
+                        {nameToPreset.map(([name, preset]) => (
+                            <div
+                                className="samples-buttons__item"
+                                onClick={() => handlePresetClick(Number(preset))}
+                            >
+                                <DefaultButton text={String(name)} />
+                            </div>
+                        ))}
                     </div>
                 )}
             </div>
