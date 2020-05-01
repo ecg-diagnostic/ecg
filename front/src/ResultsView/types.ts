@@ -7,7 +7,7 @@ export enum Abnormality {
     PrematureVentricularContraction,
     STSegmentDepression,
     STSegmentElevated,
+    Normal,
 }
 
 export type Confidence = number
-export type Confidences = Array<Confidence>

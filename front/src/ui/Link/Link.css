@@ -1,0 +1,13 @@
+.link {
+    border-bottom: 1px solid #0078d4;
+    color: #0078d4;
+    text-decoration: none;
+}
+
+.link:hover {
+    border-bottom-color: transparent;
+}
+
+.link--dotted {
+    border-bottom-style: dotted;
+}

@@ -1,9 +1,8 @@
 import { createEffect } from 'effector'
 import { Token } from '../App/types'
 import { Settings } from '../Settings/types'
-import { Confidences } from './types'
 
-const fetchAbnormalitiesFx = createEffect({
+const fetchPredictionsFx = createEffect({
     handler: (params: {
         settings: Settings
         token: Token
@@ -24,8 +23,8 @@ const fetchAbnormalitiesFx = createEffect({
                 }
                 throw new Error(response.statusText)
             })
-            .then(response => response.prediction as Confidences)
+            .then(response => response.prediction)
     },
 })
 
-export { fetchAbnormalitiesFx }
+export { fetchPredictionsFx }

@@ -1,9 +1,9 @@
 import React from 'react'
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
 import { initializeIcons } from 'office-ui-fabric-react/lib/Icons'
-import { AbnormalitiesScreen } from '../Abnormalities'
+import { ResultsView } from '../ResultsView'
 import { FileUploadView } from '../FileUploadView'
-import { PlotScreen } from '../PlotScreen'
+import { PlotScreen } from '../PlotView'
 import './App.css'
 
 initializeIcons()
@@ -19,7 +19,7 @@ function App() {
                     <PlotScreen />
                 </Route>
                 <Route exact path="/abnormalities">
-                    <AbnormalitiesScreen />
+                    <ResultsView />
                 </Route>
             </Switch>
         </BrowserRouter>

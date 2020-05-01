@@ -1,13 +1,13 @@
 const nameToPreset = [
-    ['ЭКГ в норме', 9],
-    ['ФП', 1],
-    ['I-AVB', 2],
-    ['LBBB', 3],
-    ['RBBB', 4],
-    ['PAC', 5],
-    ['PVC', 6],
-    ['STD', 7],
-    ['STE', 8],
+    ['Normal ECG', 9],
+    ['Atrial fibrillation', 1],
+    ['First-degree atrioventricular block', 2],
+    ['Left bundle brunch block', 3],
+    ['Right bundle brunch block', 4],
+    ['Premature atrial contraction', 5],
+    ['Premature ventricular contraction', 6],
+    ['ST-segment depression', 7],
+    ['ST-segment elevated', 8],
 ]
 
 export { nameToPreset }

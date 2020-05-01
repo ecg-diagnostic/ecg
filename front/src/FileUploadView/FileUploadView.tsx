@@ -1,15 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, ReactText } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { setToken } from '../App/events'
 import './FileUploadView.css'
-import { DefaultButton, PrimaryButton, Toggle } from 'office-ui-fabric-react'
+import { PrimaryButton, Toggle } from 'office-ui-fabric-react'
+import { Link } from '../ui/Link'
+import { Page } from '../ui/Page'
 import { nameToPreset } from './presets'
+import { List } from '../ui/List'
 
 function FileUploadView() {
-    const fileInputRef = useRef<HTMLInputElement>(null)
-    const [showSamplesButtons, setSamplesButtons] = useState<boolean>(false)
-    const [files, setFiles] = useState<Array<File>>([])
     const history = useHistory()
+    const fileInputRef = useRef<HTMLInputElement>(null)
+    const [showSamples, setSamplesButtons] = useState<boolean>(false)
+    const [files, setFiles] = useState<Array<File>>([])
+    const { t, i18n } = useTranslation()
 
     useEffect(() => {
         if (files.length === 0) {
@@ -56,79 +61,83 @@ function FileUploadView() {
     }
 
     function toggleSamplesButtons() {
-        setSamplesButtons(!showSamplesButtons)
+        setSamplesButtons(!showSamples)
     }
 
-    function handlePresetClick(preset: number) {
-        fetch(`/api/presets/${preset}`)
-            .then(response => {
-                if (response.ok) {
-                    return response.json()
-                }
-                throw new Error(
-                    `fetch error: ${response.status} ${response.statusText}`,
-                )
-            })
-            .then(response => {
-                setToken(response.token)
-                history.push('/plot')
-            })
-            .catch(error => console.error(error))
+    function handlePresetClick(preset: ReactText) {
+        return function(event: any) {
+            event.preventDefault()
+
+            fetch(`/api/presets/${preset}`)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json()
+                    }
+                    throw new Error(
+                        `fetch error: ${response.status} ${response.statusText}`,
+                    )
+                })
+                .then(response => {
+                    setToken(response.token)
+                    history.push('/plot')
+                })
+                .catch(error => console.error(error))
+        }
     }
 
     return (
-        <div className="view file-upload-view">
-            <div className="view__panel">
-                <div className="file-upload-view__title">Проверь свое сердце!</div>
-                <p>
-                    Это приложение поможет найти отклонения на вашей электрокардиограмме.
-                </p>
-                <p>
-                    Просто загрузите скан с 12&nbsp;отведениями, расположенными друг под другом,
-                    или файл в формате DICOM или HL7.
-                </p>
+        <Page title="Проверь свое сердце!">
+            <p>
+                Это приложение поможет найти отклонения на вашей
+                электрокардиограмме.
+            </p>
 
-                <input
-                    multiple
-                    onChange={handleUpload}
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                    type="file"
-                />
+            <p>
+                Просто загрузите скан с 12&nbsp;отведениями, расположенными друг
+                под другом, или файл в формате DICOM или HL7.
+            </p>
 
-                <div className="file-upload-view__upload">
-                    <PrimaryButton
-                        className="button"
-                        iconProps={{ iconName: 'LineChart' }}
-                        onClick={handleUploadButtonClick}
-                        text="Загрузить"
-                    />
-                </div>
+            <input
+                multiple
+                onChange={handleUpload}
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                type="file"
+            />
 
-                <p>
-                    Вы можете просто посмотреть возможности приложения включив демо
-                    режим и выбрав один из готовых примеров.
-                </p>
+            <PrimaryButton
+                className="button"
+                iconProps={{ iconName: 'LineChart' }}
+                onClick={handleUploadButtonClick}
+                text="Загрузить"
+            />
 
-                <Toggle
-                    onText="Скрыть готовые примеры"
-                    offText="Показать готовые примеры"
-                    onChange={toggleSamplesButtons}
-                />
-                {showSamplesButtons && (
-                    <div className="samples-buttons">
-                        {nameToPreset.map(([name, preset]) => (
-                            <div
-                                className="samples-buttons__item"
-                                onClick={() => handlePresetClick(Number(preset))}
-                            >
-                                <DefaultButton text={String(name)} />
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </div>
-        </div>
+            <p>
+                Вы можете просто посмотреть возможности приложения выбрав один
+                из готовых примеров:
+            </p>
+
+            <List listType={List.ListType.UnorderedList}>
+                {nameToPreset.slice(0, 2).map(([name, preset]) => (
+                    <Link
+                        to={`/plot/${preset}`}
+                        onClick={handlePresetClick(preset)}
+                        underlineType={Link.UnderlineType.Dotted}
+                    >
+                        {String(t(String(name)))}
+                    </Link>
+                ))}
+                {nameToPreset.slice(2).map(([name, preset]) => (
+                    <Link
+                        to={`/plot/${preset}`}
+                        onClick={handlePresetClick(preset)}
+                        underlineType={Link.UnderlineType.Dotted}
+                    >
+                        {String(t(String(name)))}
+                    </Link>
+                ))}
+            </List>
+        </Page>
     )
 }
 
