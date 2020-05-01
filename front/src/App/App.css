@@ -1,7 +1,6 @@
 * {
     box-sizing: border-box;
     font-family: 'Roboto', sans-serif;
-    font-weight: 300;
     line-height: 1.5;
 }
 
@@ -9,4 +8,9 @@ html, body, #root {
     height: 100%;
     margin: 0;
     padding: 0;
+}
+
+body {
+    background-image: url('/heart.jpg');
+    background-size: cover;
 }

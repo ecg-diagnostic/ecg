@@ -12,7 +12,7 @@ import { Settings } from '../Settings'
 import { Plot } from '../Plot'
 import { $token } from '../App/model'
 import { Redirect, useHistory } from 'react-router-dom'
-import { fetchAbnormalities } from './events'
+import { fetchPredictions } from './events'
 
 const PlotScreen: React.FunctionComponent = () => {
     const history = useHistory()
@@ -71,7 +71,7 @@ const PlotScreen: React.FunctionComponent = () => {
                     disabled={isFilterOpen}
                     iconProps={{ iconName: 'Health' }}
                     onClick={() => {
-                        fetchAbnormalities()
+                        fetchPredictions()
                         history.push('/abnormalities')
                     }}
                 >

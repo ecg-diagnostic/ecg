@@ -1,0 +1,1 @@
+export { ResultsView } from './ResultsView'

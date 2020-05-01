@@ -1,0 +1,40 @@
+.page {
+    align-items: center;
+    background-position: center;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    min-height: 100%;
+    padding: 1rem;
+}
+
+.page__panel {
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.132), 0 0 1px 0 rgba(0, 0, 0, 0.108);
+    padding: 1.5rem;
+    width: 100%;
+}
+
+.page__title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    line-height: 39px;
+    margin-bottom: 0;
+    margin-top: 0;
+}
+
+@media (min-width: 481px) {
+    .page__panel {
+        font-size: 16px;
+        padding: 2rem 4rem;
+        width: 480px;
+    }
+}
+
+@media screen and (min-width: 641px) {
+    .page__panel {
+        width: 640px;
+    }
+}

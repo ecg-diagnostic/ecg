@@ -1,1 +1,0 @@
-export { AbnormalitiesScreen } from './AbnormalitiesScreen'
