@@ -1,6 +1,6 @@
 import { createStore, merge, sample } from 'effector'
 import { Signals } from './types'
-import { setGraphPaperGridUrl } from './events'
+import { resetPlot, setGraphPaperGridUrl } from './events'
 import { createGraphPaperGrid } from './graphPaperGrid'
 import { defaultFrontendSettingsState, $settings } from '../Settings/model'
 import { $token } from '../App/model'
@@ -35,6 +35,7 @@ const $plot = createStore<PlotState>(defaultPlotState)
         ...state,
         signals: result,
     }))
+    .reset(resetPlot)
 
 sample({
     source: {

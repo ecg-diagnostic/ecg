@@ -1,1 +1,1 @@
-export { PlotScreen } from './PlotScreen'
+export { PlotView } from './PlotView'

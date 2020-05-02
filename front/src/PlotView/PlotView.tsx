@@ -8,13 +8,14 @@ import {
 } from 'office-ui-fabric-react'
 import { useConstCallback } from '@uifabric/react-hooks'
 import './PlotScreen.css'
+import { resetPlot } from '../Plot/events'
 import { Settings } from '../Settings'
 import { Plot } from '../Plot'
 import { $token } from '../App/model'
 import { Redirect, useHistory } from 'react-router-dom'
 import { fetchPredictions } from './events'
 
-const PlotScreen: React.FunctionComponent = () => {
+const PlotView: React.FunctionComponent = () => {
     const history = useHistory()
     const token = useStore($token)
     const [isFilterOpen, setFilterOpen] = useState<boolean>(false)
@@ -27,6 +28,11 @@ const PlotScreen: React.FunctionComponent = () => {
             <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
         </Stack>
     ))
+
+    function handleClickBack() {
+        history.push('/')
+        resetPlot()
+    }
 
     if (!token) {
         return <Redirect to="/" />
@@ -47,7 +53,7 @@ const PlotScreen: React.FunctionComponent = () => {
                     className="plot-screen__button"
                     iconProps={{ iconName: 'Back' }}
                     disabled={isFilterOpen}
-                    onClick={() => history.push('/')}
+                    onClick={handleClickBack}
                 >
                     Back
                 </DefaultButton>
@@ -72,7 +78,7 @@ const PlotScreen: React.FunctionComponent = () => {
                     iconProps={{ iconName: 'Health' }}
                     onClick={() => {
                         fetchPredictions()
-                        history.push('/abnormalities')
+                        history.push('/predictions')
                     }}
                 >
                     Diagnose{' '}
@@ -97,4 +103,4 @@ const PlotScreen: React.FunctionComponent = () => {
     )
 }
 
-export { PlotScreen }
+export { PlotView }
