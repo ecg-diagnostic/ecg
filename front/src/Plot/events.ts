@@ -1,5 +1,9 @@
 import { createEvent } from 'effector'
 
+const resetPlot = createEvent()
 const setGraphPaperGridUrl = createEvent<string>()
 
-export { setGraphPaperGridUrl }
+export {
+    resetPlot,
+    setGraphPaperGridUrl,
+}

@@ -4,21 +4,34 @@ import { fetchPredictions } from '../PlotView/events'
 import { $settings } from '../Settings/model'
 import { fetchPredictionsFx } from './effects'
 import { resetPredictions } from './events'
-import { Abnormality, Confidence } from './types'
 
-interface Result {
+export enum Abnormality {
+    AtrialFibrillation,
+    FirstDegreeAtrioventricularBlock,
+    LeftBundleBrunchBlock,
+    RightBundleBrunchBlock,
+    PrematureAtrialContraction,
+    PrematureVentricularContraction,
+    STSegmentDepression,
+    STSegmentElevated,
+    Normal,
+}
+
+type Confidence = number
+
+interface Prediction {
     abnormality: Abnormality,
     confidence: Confidence,
     name: string,
 }
 
-interface AbnormalitiesState {
+interface PredictionsState {
     loading: boolean;
-    mostConfidentPrediction: Result;
-    results: Array<Result>;
+    mostConfidentPrediction: Prediction;
+    results: Array<Prediction>;
 }
 
-const defaultState: AbnormalitiesState = {
+const defaultState: PredictionsState = {
     loading: true,
     mostConfidentPrediction: {
         abnormality: Abnormality.Normal,
@@ -74,7 +87,7 @@ const defaultState: AbnormalitiesState = {
     ],
 }
 
-const $predictions = createStore<AbnormalitiesState>(defaultState)
+const $predictions = createStore<PredictionsState>(defaultState)
     .on(fetchPredictionsFx.done, (state, payload) => {
         const results = state.results.map((result, i) => ({
             ...result,
@@ -83,6 +96,8 @@ const $predictions = createStore<AbnormalitiesState>(defaultState)
 
         const mostConfidentResult = results
             .sort((r1, r2) => r2.confidence - r1.confidence)[0]
+        console.log('results', results)
+        console.log('most confident', mostConfidentResult)
 
         return {
             loading: false,

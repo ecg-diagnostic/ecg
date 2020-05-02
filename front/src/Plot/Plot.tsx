@@ -69,6 +69,7 @@ function Plot() {
         <svg
             ref={svgRef}
             style={{
+                backgroundColor: '#fff',
                 backgroundImage: `url(${graphPaperGridUrl})`,
                 backgroundSize: `${gridSize}px`,
                 display: 'block',

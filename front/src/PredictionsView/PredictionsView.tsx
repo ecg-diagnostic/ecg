@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { $token } from '../App/model'
 import { Page } from '../ui/Page'
-import { $predictions } from './model'
-import { Abnormality } from './types'
+import { resetPredictions } from './events'
+import { $predictions, Abnormality } from './model'
 
-function ResultsView() {
+function PredictionsView() {
     const history = useHistory()
     const predictions = useStore($predictions)
     const token = useStore($token)
@@ -19,6 +19,11 @@ function ResultsView() {
             history.push('/')
         }
     })
+
+    function handleClickBack() {
+        history.goBack()
+        resetPredictions()
+    }
 
     const isNormal =
         predictions.mostConfidentPrediction.abnormality === Abnormality.Normal
@@ -38,12 +43,13 @@ function ResultsView() {
             )}
             <p>
                 Результаты данного исследования не являются окончательным
-                диагнозом.<br /> Клинический диагноз, основанный на полном пациента,
-                устанавливает лечащий врач.
+                диагнозом.
+                <br /> Клинический диагноз, основанный на полном обследовании
+                пациента, устанавливает лечащий врач.
             </p>
             <DefaultButton
                 iconProps={{ iconName: 'Back' }}
-                onClick={() => history.goBack()}
+                onClick={handleClickBack}
             >
                 Назад
             </DefaultButton>
@@ -51,4 +57,4 @@ function ResultsView() {
     )
 }
 
-export { ResultsView }
+export { PredictionsView }

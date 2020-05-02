@@ -3,18 +3,17 @@ import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { setToken } from '../App/events'
 import './FileUploadView.css'
-import { PrimaryButton, Toggle } from 'office-ui-fabric-react'
+import { PrimaryButton, } from 'office-ui-fabric-react'
 import { Link } from '../ui/Link'
 import { Page } from '../ui/Page'
 import { nameToPreset } from './presets'
 import { List } from '../ui/List'
 
 function FileUploadView() {
-    const history = useHistory()
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const [showSamples, setSamplesButtons] = useState<boolean>(false)
     const [files, setFiles] = useState<Array<File>>([])
-    const { t, i18n } = useTranslation()
+    const history = useHistory()
+    const { t } = useTranslation()
 
     useEffect(() => {
         if (files.length === 0) {
@@ -42,7 +41,7 @@ function FileUploadView() {
                 history.push('/plot')
             })
             .catch(error => console.error(error))
-    }, [files])
+    }, [history, files])
 
     function handleUpload(event: React.FormEvent<HTMLInputElement>) {
         if (!(event.target instanceof HTMLInputElement)) {
@@ -58,10 +57,6 @@ function FileUploadView() {
         if (fileInputRef.current) {
             fileInputRef.current.click()
         }
-    }
-
-    function toggleSamplesButtons() {
-        setSamplesButtons(!showSamples)
     }
 
     function handlePresetClick(preset: ReactText) {

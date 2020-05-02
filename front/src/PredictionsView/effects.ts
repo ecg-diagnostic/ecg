@@ -14,7 +14,7 @@ const fetchPredictionsFx = createEffect({
         }
 
         const query = new URLSearchParams(Object(settings)).toString()
-        const url = `/api/${token}/abnormalities?${query}`
+        const url = `/api/${token}/predictions?${query}`
 
         return fetch(url)
             .then(response => {

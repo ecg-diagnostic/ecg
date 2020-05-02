@@ -61,10 +61,10 @@ func handler(next func(w http.ResponseWriter, r *http.Request) (int, error)) fun
 
 func main() {
 	router := mux.NewRouter()
-	router.Path("/api/presets/{class}").Methods(http.MethodGet).HandlerFunc(handler(presetHandler))
-	router.Path("/api/upload").Methods(http.MethodPost).HandlerFunc(HandleUpload)
-	router.Path("/api/{token}").Methods(http.MethodGet).HandlerFunc(HandleGet)
-	router.Path("/api/{token}/abnormalities").Methods(http.MethodGet).HandlerFunc(HandleGetAbnormalities)
+	router.Path("/api/presets/{class}").Methods(http.MethodGet).HandlerFunc(handler(handlePreset))
+	router.Path("/api/upload").Methods(http.MethodPost).HandlerFunc(handleUpload)
+	router.Path("/api/{token}").Methods(http.MethodGet).HandlerFunc(handleGet)
+	router.Path("/api/{token}/predictions").Methods(http.MethodGet).HandlerFunc(handlePredictions)
 
 	var backAddr, listenAddr = GetBackAddr()
 	log.Println("backend listening", backAddr)
@@ -104,7 +104,7 @@ func writeToken(w http.ResponseWriter, token Token)  {
 	log.Println("sent response to front")
 }
 
-func presetHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+func handlePreset(w http.ResponseWriter, r *http.Request) (int, error) {
 	log.Println("handle preset")
 
 	class, ok := mux.Vars(r)["class"]
@@ -113,29 +113,29 @@ func presetHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 
 	classToPresetFileName := map[string]string{
-		"1": "A1957.mat",
-		"2": "A1973.mat",
-		"3": "A1974.mat",
-		"4": "A2065.mat",
-		"5": "A1966.mat",
-		"6": "A1980.mat",
-		"7": "A0005.mat",
-		"8": "A0014.mat",
+		"1": "A1961.mat",
+		"2": "A1957.mat",
+		"3": "A0042.mat",
+		"4": "A0057.mat",
+		"5": "A0022.mat",
+		"6": "A0108.mat",
+		"7": "A0012.mat",
+		"8": "A0060.mat",
 		"9": "A1960.mat",
 	}
 
 	presetFileName, ok := classToPresetFileName[class]
+	presetFilePath := path.Join("presets", presetFileName)
 	if !ok {
 		return http.StatusNotFound, fmt.Errorf("invalid preset class: %s", class)
 	}
 
-	presetFilePath := path.Join("presets", presetFileName)
 	f, err := os.Open(presetFilePath)
 	if err != nil {
 		return http.StatusInternalServerError, fmt.Errorf("failed to open %s", presetFilePath)
 	}
-	log.Println("opened " + presetFilePath)
 
+	log.Println("opened " + presetFilePath)
 	requestBody := &bytes.Buffer{}
 	multipartWriter := multipart.NewWriter(requestBody)
 
@@ -168,7 +168,7 @@ func presetHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	return http.StatusOK, nil
 }
 
-func HandleGet(w http.ResponseWriter, r *http.Request) {
+func handleGet(w http.ResponseWriter, r *http.Request) {
 	log.Println("handle get")
 
 	token, ok := mux.Vars(r)["token"]
@@ -214,7 +214,7 @@ func HandleGet(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(signals)
 }
 
-func HandleUpload(w http.ResponseWriter, r *http.Request) {
+func handleUpload(w http.ResponseWriter, r *http.Request) {
 	log.Println("handle upload")
 
 	log.Println("parse multipart form")
@@ -278,7 +278,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(response)
 }
 
-func HandleGetAbnormalities(w http.ResponseWriter, r *http.Request) {
+func handlePredictions(w http.ResponseWriter, r *http.Request) {
 	log.Println("handle abnormalities")
 
 	token, ok := mux.Vars(r)["token"]

@@ -11,6 +11,7 @@ WORKDIR /back
 COPY --from=builder /back/*.py ./
 COPY --from=builder /back/poetry.lock .
 COPY --from=builder /back/pyproject.toml .
+COPY --from=builder /back/presets ./
 COPY --from=builder /go/bin/back /go/bin/back
 RUN apt-get update \
     && pip3 install poetry \

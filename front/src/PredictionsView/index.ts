@@ -1,0 +1,1 @@
+export { PredictionsView } from './PredictionsView'
