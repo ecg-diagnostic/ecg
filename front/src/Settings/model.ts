@@ -1,8 +1,9 @@
 import { createStore } from 'effector'
-import { FloatPrecision, Lead, LEADS, Settings, Speed } from './types'
+import { FloatPrecision, FrontendSettings, Lead, Settings, Speed } from './types'
 import {
     resetSettings,
     setFloatPrecision,
+    setLineHeightInCells,
     setLowerFrequencyBound,
     setSampleRate,
     setGridSize,
@@ -37,24 +38,47 @@ const $settings = createStore<Settings>(defaultSettingsState)
     }))
     .reset(resetSettings)
 
-export type FrontendSettingsState = {
-    gridSize: number,
-    speed: Speed,
-    visibleLeads: Set<Lead>,
-}
-
-export const defaultFrontendSettingsState: FrontendSettingsState = {
-    gridSize: 20,
+const gridSize = 20
+const defaultFrontendSettingsState: FrontendSettings = {
+    color: '#ffa500',
+    gridSize,
+    lineHeight: 4 * gridSize,
+    paddingBottom: 2 * gridSize,
+    paddingLeft: gridSize,
+    paddingRight: gridSize,
+    paddingTop: 3 * gridSize,
     speed: Speed._25mmPerSec,
-    visibleLeads: new Set(LEADS),
+    visibleLeads: [
+        Lead.I,
+        Lead.II,
+        Lead.III,
+        Lead.aVL,
+        Lead.aVR,
+        Lead.aVF,
+        Lead.V1,
+        Lead.V2,
+        Lead.V3,
+        Lead.V4,
+        Lead.V5,
+        Lead.V6,
+    ],
 }
 
-const $frontendSettings = createStore<FrontendSettingsState>(
+const $frontendSettings = createStore<FrontendSettings>(
     defaultFrontendSettingsState,
 )
     .on(setGridSize, (state, scale) => ({
         ...state,
         gridSize: scale,
+        lineHeight: scale * (state.lineHeight / state.gridSize),
+        paddingBottom: scale * (defaultFrontendSettingsState.paddingBottom / gridSize),
+        paddingLeft: scale * (defaultFrontendSettingsState.paddingLeft / gridSize),
+        paddingRight: scale * (defaultFrontendSettingsState.paddingRight / gridSize),
+        paddingTop: scale * (defaultFrontendSettingsState.paddingTop / gridSize),
+    }))
+    .on(setLineHeightInCells, (state, lineHeightInCells) => ({
+        ...state,
+        lineHeight: lineHeightInCells * state.gridSize,
     }))
     .on(setSpeed, (state, speed) => ({
         ...state,
@@ -63,15 +87,20 @@ const $frontendSettings = createStore<FrontendSettingsState>(
     .on(toggleVisibleLead, (state, lead) => {
         const { visibleLeads } = state
 
-        if (visibleLeads.has(lead)) {
-            visibleLeads.delete(lead)
-        } else {
-            visibleLeads.add(lead)
+        if (visibleLeads.includes(lead)) {
+            const set = new Set(visibleLeads)
+            set.delete(lead)
+            return {
+                ...state,
+                visibleLeads: Array.from(set),
+            }
         }
 
         return {
             ...state,
-            visibleLeads,
+            visibleLeads: Array
+                .from(new Set<Lead>([...visibleLeads, lead]))
+                .sort((a, b) => a - b)
         }
     })
     .on(resetSettings, () => defaultFrontendSettingsState)

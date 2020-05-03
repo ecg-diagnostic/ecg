@@ -1,8 +1,7 @@
 import { createStore, merge, sample } from 'effector'
 import { Signals } from './types'
-import { resetPlot, setGraphPaperGridUrl } from './events'
-import { createGraphPaperGrid } from './graphPaperGrid'
-import { defaultFrontendSettingsState, $settings } from '../Settings/model'
+import { resetPlot } from './events'
+import { $settings } from '../Settings/model'
 import { $token } from '../App/model'
 import {
     resetSettings,
@@ -15,22 +14,14 @@ import { setToken } from '../App/events'
 import { fetchSignalsFx } from './effects'
 
 export type PlotState = {
-    graphPaperGridUrl: string
     signals: Signals
 }
 
 const defaultPlotState: PlotState = {
-    graphPaperGridUrl: createGraphPaperGrid(
-        defaultFrontendSettingsState.gridSize,
-    ),
     signals: Array(12).fill(new Float32Array()),
 }
 
 const $plot = createStore<PlotState>(defaultPlotState)
-    .on(setGraphPaperGridUrl, (state, svgGridUrl) => ({
-        ...state,
-        graphPaperGridUrl: svgGridUrl,
-    }))
     .on(fetchSignalsFx.done, (state, { result }) => ({
         ...state,
         signals: result,

@@ -96,8 +96,6 @@ const $predictions = createStore<PredictionsState>(defaultState)
 
         const mostConfidentResult = results
             .sort((r1, r2) => r2.confidence - r1.confidence)[0]
-        console.log('results', results)
-        console.log('most confident', mostConfidentResult)
 
         return {
             loading: false,

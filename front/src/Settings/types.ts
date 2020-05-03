@@ -10,7 +10,19 @@ export const FLOAT_PRECISIONS: Array<FloatPrecision> = [
     FloatPrecision.Float64,
 ]
 
-export type Settings = {
+export interface FrontendSettings {
+    color: string
+    gridSize: number
+    lineHeight: number
+    paddingBottom: number
+    paddingLeft: number
+    paddingRight: number
+    paddingTop: number
+    speed: Speed
+    visibleLeads: Array<Lead>
+}
+
+export interface Settings {
     floatPrecision: FloatPrecision
     lowerFrequencyBound: Hz
     sampleRate: Hz

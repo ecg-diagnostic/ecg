@@ -2,6 +2,16 @@ import { createEffect } from 'effector'
 import { FloatPrecision, LEADS, Settings } from '../Settings/types'
 import { Token } from '../App/types'
 
+interface DownloadPlotFxParams {
+    settings: Settings
+    token: Token
+}
+
+const downloadPlotFx = createEffect({
+    handler: (params: DownloadPlotFxParams): void => {
+    }
+})
+
 const fetchSignalsFx = createEffect({
     handler: (params: {
         settings: Settings
@@ -55,4 +65,4 @@ const fetchSignalsFx = createEffect({
     },
 })
 
-export { fetchSignalsFx }
+export { downloadPlotFx, fetchSignalsFx }
