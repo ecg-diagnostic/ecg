@@ -11,9 +11,10 @@ import './Settings.css'
 import {
     resetSettings,
     setFloatPrecision,
+    setGridSize,
+    setLineHeightInCells,
     setLowerFrequencyBound,
     setSampleRate,
-    setGridSize,
     setSpeed,
     setUpperFrequencyBound,
     toggleVisibleLead,
@@ -22,7 +23,9 @@ import { FLOAT_PRECISIONS, FloatPrecision, Lead, LEADS, Speed } from './types'
 import { $frontendSettings, $settings } from './model'
 
 function Settings() {
-    const { gridSize, speed, visibleLeads } = useStore($frontendSettings)
+    const { gridSize, lineHeight, speed, visibleLeads } = useStore(
+        $frontendSettings,
+    )
     const {
         floatPrecision,
         lowerFrequencyBound,
@@ -34,15 +37,26 @@ function Settings() {
 
     return (
         <Stack tokens={{ childrenGap: 12 }} className="settings">
-            <Slider
-                value={gridSize}
-                label="Zoom"
-                max={30}
-                min={10}
-                onChange={setGridSize}
-                step={1}
-                valueFormat={(value: number) => `${value * 2} px/cm`}
-            />
+            <Stack>
+                <Slider
+                    value={gridSize}
+                    label="Zoom"
+                    max={30}
+                    min={10}
+                    onChange={setGridSize}
+                    step={1}
+                    valueFormat={(value: number) => `${value * 2} px/cm`}
+                />
+                <Slider
+                    value={lineHeight / gridSize}
+                    label="Line height"
+                    max={8}
+                    min={3}
+                    onChange={setLineHeightInCells}
+                    step={1}
+                    valueFormat={(value: number) => `${value * 5} mm`}
+                />
+            </Stack>
 
             <Stack>
                 <Label>Horizontal scale</Label>
@@ -75,7 +89,7 @@ function Settings() {
                     >
                         {LEADS.slice(...interval).map(lead => (
                             <DefaultButton
-                                checked={visibleLeads.has(lead)}
+                                checked={visibleLeads.includes(lead)}
                                 key={lead}
                                 onClick={() => toggleVisibleLead(lead)}
                             >

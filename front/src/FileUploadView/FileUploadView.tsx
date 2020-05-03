@@ -113,17 +113,9 @@ function FileUploadView() {
             </p>
 
             <List listType={List.ListType.UnorderedList}>
-                {nameToPreset.slice(0, 2).map(([name, preset]) => (
+                {nameToPreset.map(([name, preset]) => (
                     <Link
-                        to={`/plot/${preset}`}
-                        onClick={handlePresetClick(preset)}
-                        underlineType={Link.UnderlineType.Dotted}
-                    >
-                        {String(t(String(name)))}
-                    </Link>
-                ))}
-                {nameToPreset.slice(2).map(([name, preset]) => (
-                    <Link
+                        key={name}
                         to={`/plot/${preset}`}
                         onClick={handlePresetClick(preset)}
                         underlineType={Link.UnderlineType.Dotted}
