@@ -10,7 +10,10 @@ interface DrawGridSettings {
 
 type DrawSettings = FrontendSettings & Settings
 
-function drawGrid(svgElement: SVGSVGElement | null, settings: DrawGridSettings,): void {
+function drawGrid(
+    svgElement: SVGSVGElement | null,
+    settings: DrawGridSettings,
+): void {
     const pattern = d3
         .select(svgElement)
         .append('defs')
@@ -52,8 +55,10 @@ function drawGrid(svgElement: SVGSVGElement | null, settings: DrawGridSettings,)
         .attr('d', d3.line())
 }
 
-export function createTile(settings: DrawGridSettings): string {
-    const tileElement = (document.createElement('svg',) as unknown) as SVGSVGElement
+function createTile(settings: DrawGridSettings): string {
+    const tileElement = (document.createElement(
+        'svg',
+    ) as unknown) as SVGSVGElement
     tileElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
 
     drawGrid(tileElement, settings)
@@ -72,28 +77,43 @@ export function createTile(settings: DrawGridSettings): string {
     return URL.createObjectURL(blob)
 }
 
-export function draw(svgElement: SVGSVGElement | null, signals: Signals, settings: DrawSettings,) {
-    const patternName = 'grid'
-    drawGrid(svgElement, {
-        color: settings.color, gridSize: settings.gridSize, patternName,
-    })
-
+function draw(
+    svgElement: SVGSVGElement | null,
+    signals: Signals,
+    settings: DrawSettings,
+    withGrid = true,
+): void {
     const {
-        gridSize, lineHeight, paddingLeft, paddingTop, sampleRate, speed, visibleLeads,
+        gridSize,
+        lineHeight,
+        paddingLeft,
+        paddingTop,
+        sampleRate,
+        speed,
+        visibleLeads,
     } = settings
 
-    const svg = d3.select(svgElement)
+    const svg = d3.select(svgElement).attr('fill', '#fff')
     const [height, width] = getDimensions(signals, settings)
 
     svg.append('rect')
         .attr('height', height)
         .attr('width', width)
-        .attr('fill', `url(#${patternName})`)
+
+    if (withGrid) {
+        const patternName = 'grid'
+        drawGrid(svgElement, {
+            color: settings.color,
+            gridSize: settings.gridSize,
+            patternName,
+        })
+        svg.attr('fill', `url(#${patternName})`)
+    }
 
     visibleLeads.forEach((lead, line_idx) => {
         const datum = Array.from(signals[lead]).map((y, x) => {
             const offsetTop = lineHeight * line_idx
-            const stepX = speed * gridSize / 5
+            const stepX = (speed * gridSize) / 5
 
             x = paddingLeft + (x / sampleRate) * stepX
             y = paddingTop + offsetTop - y * 2 * gridSize
@@ -112,7 +132,10 @@ export function draw(svgElement: SVGSVGElement | null, signals: Signals, setting
     })
 }
 
-export function getDimensions(signals: Signals, s: Settings & FrontendSettings,): [number, number] {
+function getDimensions(
+    signals: Signals,
+    s: Settings & FrontendSettings,
+): [number, number] {
     const seconds = signals[0].length / s.sampleRate
     const innerHeight = (s.visibleLeads.length - 1) * s.lineHeight
     const innerWidth = seconds * (s.speed / 5) * s.gridSize
@@ -120,3 +143,5 @@ export function getDimensions(signals: Signals, s: Settings & FrontendSettings,)
     const width = s.paddingLeft + innerWidth + s.paddingRight
     return [height, width]
 }
+
+export { createTile, draw, drawGrid, getDimensions }

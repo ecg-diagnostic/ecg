@@ -1,7 +1,7 @@
 import { createStore, merge, sample } from 'effector'
 import { Signals } from './types'
-import { resetPlot } from './events'
-import { $settings } from '../Settings/model'
+import { downloadPlot, resetPlot } from './events'
+import { $frontendSettings, $settings } from '../Settings/model'
 import { $token } from '../App/model'
 import {
     resetSettings,
@@ -11,7 +11,7 @@ import {
     setUpperFrequencyBound,
 } from '../Settings/events'
 import { setToken } from '../App/events'
-import { fetchSignalsFx } from './effects'
+import { downloadPlotFx, fetchSignalsFx } from './effects'
 
 export type PlotState = {
     signals: Signals
@@ -42,6 +42,16 @@ sample({
         setUpperFrequencyBound,
     ]),
     target: fetchSignalsFx,
+})
+
+sample({
+    source: {
+        frontendSettings: $frontendSettings,
+        settings: $settings,
+        plot: $plot,
+    },
+    clock: downloadPlot,
+    target: downloadPlotFx,
 })
 
 export { $plot }

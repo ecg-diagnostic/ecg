@@ -7,8 +7,8 @@ import {
     Stack,
 } from 'office-ui-fabric-react'
 import { useConstCallback } from '@uifabric/react-hooks'
-import './PlotScreen.css'
-import { resetPlot } from '../Plot/events'
+import './PlotView.css'
+import { downloadPlot, resetPlot } from '../Plot/events'
 import { Settings } from '../Settings'
 import { Plot } from '../Plot'
 import { $token } from '../App/model'
@@ -60,7 +60,7 @@ const PlotView: React.FunctionComponent = () => {
                 <DefaultButton
                     className="plot-screen__button"
                     iconProps={{ iconName: 'Installation' }}
-                    disabled
+                    onClick={() => downloadPlot()}
                 >
                     Download as image
                 </DefaultButton>
