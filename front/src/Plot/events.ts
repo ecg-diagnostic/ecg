@@ -1,5 +1,9 @@
 import { createEvent } from 'effector'
 
+const downloadPlot = createEvent()
 const resetPlot = createEvent()
 
-export { resetPlot }
+export {
+    downloadPlot,
+    resetPlot,
+}

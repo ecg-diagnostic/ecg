@@ -1,15 +1,84 @@
+import * as d3 from 'd3'
 import { createEffect } from 'effector'
-import { FloatPrecision, LEADS, Settings } from '../Settings/types'
+import { saveAs } from 'file-saver'
+import {
+    FloatPrecision,
+    FrontendSettings,
+    LEADS,
+    Settings,
+} from '../Settings/types'
 import { Token } from '../App/types'
+import { createTile, draw, getDimensions } from './draw'
+import { PlotState } from './model'
 
-interface DownloadPlotFxParams {
+interface DownloadPlotFxStores {
+    frontendSettings: FrontendSettings
     settings: Settings
-    token: Token
+    plot: PlotState
 }
 
 const downloadPlotFx = createEffect({
-    handler: (params: DownloadPlotFxParams): void => {
-    }
+    handler: (stores: DownloadPlotFxStores): void => {
+        const settings = {
+            ...stores.frontendSettings,
+            ...stores.settings,
+        }
+        const { signals } = stores.plot
+        const svg = (document.createElement('svg') as unknown) as SVGSVGElement
+
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
+        const [height, width] = getDimensions(signals, settings)
+        d3
+            .select(svg)
+            .attr('height', height)
+            .attr('width', width)
+
+        draw(svg, signals, settings)
+
+        const canvas = document.createElement('canvas')
+        canvas.height = height
+        canvas.width = width
+
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+            return
+        }
+
+        const blob = new Blob([svg.outerHTML], {
+            type: 'image/svg+xml',
+        })
+        const url = URL.createObjectURL(blob)
+
+        const image = new Image()
+        image.onload = () => {
+            const tileUrl = createTile({
+                color: settings.color,
+                gridSize: settings.gridSize,
+                patternName: 'tile',
+            })
+            const tileImage = new Image()
+            tileImage.onload = () => {
+                const pattern = ctx.createPattern(tileImage, 'repeat')
+                if (!pattern) {
+                    return
+                }
+
+                ctx.fillStyle = '#fff'
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+                ctx.fillStyle = pattern
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+                ctx.drawImage(image, 0, 0)
+                canvas.toBlob(blob => {
+                    if (blob) {
+                        saveAs(blob, 'ecg.png')
+                    }
+                });
+            }
+            tileImage.src = tileUrl
+        }
+        image.src = url
+    },
 })
 
 const fetchSignalsFx = createEffect({
