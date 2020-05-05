@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { setToken } from '../App/events'
 import './FileUploadView.css'
-import { PrimaryButton, } from 'office-ui-fabric-react'
+import { PrimaryButton } from 'office-ui-fabric-react'
 import { Link } from '../ui/Link'
+import { Note } from '../ui/Note'
 import { Page } from '../ui/Page'
 import { nameToPreset } from './presets'
 import { List } from '../ui/List'
@@ -81,7 +82,7 @@ function FileUploadView() {
     }
 
     return (
-        <Page title="Проверь свое сердце!">
+        <Page title="Проверь свое сердце">
             <p>
                 Это приложение поможет найти отклонения на вашей
                 электрокардиограмме.
@@ -124,6 +125,27 @@ function FileUploadView() {
                     </Link>
                 ))}
             </List>
+
+            <Note>
+                Предлагаемая система не является системой поддержки принятия
+                врачебного решения и не может заменить врача.
+            </Note>
+            <Note>
+                В случае необходимости обращайтесь к квалифицированному
+                кардиологу.
+            </Note>
+            <Note>Никакая персональная информация не хранится.</Note>
+            <Note>
+                Данная система анализирует ЭКГ с помощью {' '}
+                <Link to="https://hkupload.oss-cn-hongkong.aliyuncs.com/CPSC0223.zip">
+                    модели
+                </Link>
+                {' '} от Wenjie Cai, Jing Ma, Li Yang, Danqin Hu, Yanan Liu из
+                соревнования{' '}
+                <Link to="http://2018.icbeb.org/Challenge.html">
+                    The China Physiological Signal Challenge 2018
+                </Link>
+            </Note>
         </Page>
     )
 }

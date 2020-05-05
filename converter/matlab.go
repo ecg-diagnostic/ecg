@@ -8,7 +8,7 @@ import (
 )
 
 func parseMatlabFile(fileContent []byte) ([]byte, error) {
-	log.Println("get dicom signature")
+	log.Println("get matlab signature")
 	signature := string(fileContent[:8])
 
 	if signature != "MATLAB 5" {

@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useHistory } from 'react-router-dom'
 import { $token } from '../App/model'
+import { Note } from '../ui/Note'
 import { Page } from '../ui/Page'
 import { resetPredictions } from './events'
 import { $predictions, Abnormality } from './model'
@@ -41,12 +42,20 @@ function PredictionsView() {
                     </strong>
                 </p>
             )}
-            <p>
-                Результаты данного исследования не являются окончательным
-                диагнозом.
-                <br /> Клинический диагноз, основанный на полном обследовании
-                пациента, устанавливает лечащий врач.
-            </p>
+            <Note>
+                Предлагаемая система не является системой поддержки принятия
+                врачебного решения и не может заменить врача.
+            </Note>
+
+            <Note>
+                В случае
+                необходимости обращайтесь к квалифицированному кардиологу.
+            </Note>
+
+            <Note>
+                Никакая персональная информация не хранится.
+            </Note>
+
             <DefaultButton
                 iconProps={{ iconName: 'Back' }}
                 onClick={handleClickBack}
