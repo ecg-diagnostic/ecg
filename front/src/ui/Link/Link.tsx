@@ -9,7 +9,7 @@ enum UnderlineType {
 
 interface LinkProps {
     children: ReactText,
-    onClick: (event: any) => void
+    onClick?: (event: any) => void
     to: string,
     underlineType: UnderlineType,
 }

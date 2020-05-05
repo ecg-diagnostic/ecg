@@ -20,7 +20,7 @@ const PlotView: React.FunctionComponent = () => {
     const token = useStore($token)
     const [isFilterOpen, setFilterOpen] = useState<boolean>(false)
 
-    const openPanel = useConstCallback(() => setFilterOpen(true))
+    const togglePanel = () => setFilterOpen(!isFilterOpen)
     const dismissPanel = useConstCallback(() => setFilterOpen(false))
 
     const onRenderFooterContent = useConstCallback(() => (
@@ -52,7 +52,6 @@ const PlotView: React.FunctionComponent = () => {
                 <DefaultButton
                     className="plot-screen__button"
                     iconProps={{ iconName: 'Back' }}
-                    disabled={isFilterOpen}
                     onClick={handleClickBack}
                 >
                     Back
@@ -65,16 +64,15 @@ const PlotView: React.FunctionComponent = () => {
                     Download as image
                 </DefaultButton>
                 <DefaultButton
+                    checked={isFilterOpen}
                     className="plot-screen__button"
-                    disabled={isFilterOpen}
                     iconProps={{ iconName: 'FilterSettings' }}
-                    onClick={openPanel}
+                    onClick={togglePanel}
                 >
                     Settings
                 </DefaultButton>
                 <PrimaryButton
                     className="plot-screen__button--primary"
-                    disabled={isFilterOpen}
                     iconProps={{ iconName: 'Health' }}
                     onClick={() => {
                         fetchPredictions()
@@ -91,6 +89,7 @@ const PlotView: React.FunctionComponent = () => {
             <Panel
                 closeButtonAriaLabel="Close"
                 headerText="Settings"
+                isBlocking={false}
                 isFooterAtBottom={true}
                 isLightDismiss
                 isOpen={isFilterOpen}
