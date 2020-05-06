@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Install Golang
+    name: Install Necessary Tools for Running Tests
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -17,6 +17,10 @@ jobs:
       with:
         go-version: 1.13.8
       id: go
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.20.1'
       
     - name: Get dependencies, Build, Run Tests for back
       run: | 
@@ -30,3 +34,8 @@ jobs:
         go get -d -v -t
         go build .
         go test -cover .
+    - name: Get dependencies, Build, Run Tests for front
+        run: |
+          cd ./front
+          npm install
+          CI=true npm test
