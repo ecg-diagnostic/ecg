@@ -142,17 +142,14 @@ def get_signal_from_image_array(img, sec_per_cell=0.2, px_per_sec=500, mvolt_per
 
     cell_size = get_cell_size(img)
     px_per_sec_img = cell_size / sec_per_cell
+    mvolt_per_px = mvolt_per_cell / cell_size
     new_points = np.arange(graphs_normalized.shape[1], step=px_per_sec_img / px_per_sec)
-    spline = CubicSpline(
-        np.arange(graphs_normalized.shape[1]),
-        graphs_normalized,
-        axis=1,
-    )(new_points)
-    graphs_normalized_scaled = -1 / cell_size / mvolt_per_cell * spline
+    graphs_normalized_scaled = -1 * mvolt_per_px * CubicSpline(np.arange(graphs_normalized.shape[1]), graphs_normalized,
+        axis=1)(new_points)
     return graphs_normalized_scaled
 
 
-def get_signal_from_image(img_path, sec_per_cell=0.2, px_per_sec=1535, mvolt_per_cell=0.60):
+def get_signal_from_image(img_path, sec_per_cell=0.2, px_per_sec=500, mvolt_per_cell=0.5):
     img = plt.imread(img_path)
 
     return get_signal_from_image_array(img, sec_per_cell, px_per_sec, mvolt_per_cell)
