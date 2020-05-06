@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="http://check-ecg.ru"><b>Проверь свое сердце</b></a>
+  <a href="http://check-ecg.ru"><img src="./images/check.png" alt="This browser doesn't support PNG file" width="30%" height="30%"/></a>
 </p>
 
 <p align="justify">
