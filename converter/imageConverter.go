@@ -36,7 +36,7 @@ func parseImage(fileContent []byte) ([]byte, error) {
 	}
 	log.Println("ParseImage fileContent type is supported")
 	log.Println("ParseImage exec command: poetry run python3 imageConverter.py")
-	imgConverterCommand := exec.Command("python3", "imageConverter.py")
+	imgConverterCommand := exec.Command("poetry", "run", "python3", "imageConverter.py")
 	imgConverterCommand.Env = append(imgConverterCommand.Env, os.Environ()...)
 
 	log.Println("ParseImage pipe stdin to subprocess")
