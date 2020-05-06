@@ -32,8 +32,9 @@ func parseImage(fileContent []byte) ([]byte, error) {
 
 	if err != nil {
 		log.Println("ParseImage fileContent type is not supported")
-		return nil, err
+		return nil, errNotSupported
 	}
+
 	log.Println("ParseImage fileContent type is supported")
 	log.Println("ParseImage exec command: poetry run python3 imageConverter.py")
 	imgConverterCommand := exec.Command("poetry", "run", "python3", "imageConverter.py")

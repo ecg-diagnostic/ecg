@@ -12,7 +12,7 @@ func parseMatlabFile(fileContent []byte) ([]byte, error) {
 	signature := string(fileContent[:8])
 
 	if signature != "MATLAB 5" {
-		return nil, nil
+		return nil, errNotSupported
 	}
 
 	log.Println("parse matlab file")
