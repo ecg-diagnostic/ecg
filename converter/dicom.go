@@ -12,7 +12,7 @@ func parseDicomFile(fileContent []byte) ([]byte, error) {
 	signature := string(fileContent[128:132])
 
 	if signature != "DICM" {
-		return nil, nil
+		return nil, errNotSupported
 	}
 
 	log.Println("parse dicom file")

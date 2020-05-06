@@ -48,7 +48,7 @@ func parseHL7(fileContent []byte) ([]byte, error) {
 	var document Document
 	err := xml.Unmarshal(fileContent, &document)
 	if err != nil || document.XMLName.Local != "AnnotatedECG" {
-		return nil, nil
+		return nil, errNotSupported
 	}
 
 	for _, series := range document.Series {

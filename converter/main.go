@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -10,7 +11,10 @@ import (
 	"net/http"
 )
 
-var parsers []func([]byte) ([]byte, error)
+var (
+	errNotSupported = errors.New("format is not supported")
+	parsers []func([]byte) ([]byte, error)
+)
 
 func main() {
 	r := mux.NewRouter()
@@ -64,13 +68,13 @@ func handleConvert(w http.ResponseWriter, r *http.Request) {
 
 		for _, parseFile := range parsers {
 			convertedFile, err := parseFile(partContent)
+			if errors.Is(err, errNotSupported) {
+				continue
+			}
+
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
-			}
-
-			if convertedFile == nil {
-				continue
 			}
 
 			w.Header().Set("Content-Type", "application/octet-stream")
