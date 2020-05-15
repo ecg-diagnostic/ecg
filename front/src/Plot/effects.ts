@@ -128,7 +128,7 @@ const fetchSignalsFx = createEffect({
                     }
                 }
                 throw new Error(
-                    `wrong float precision: ${FloatPrecision.Float64}`,
+                    `wrong float precision: ${settings.floatPrecision}`,
                 )
             })
     },
