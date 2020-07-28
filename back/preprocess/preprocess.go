@@ -1,4 +1,4 @@
-package main
+package preprocess
 
 import (
 	"errors"
@@ -10,7 +10,14 @@ import (
 	"strconv"
 )
 
-func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
+type Params struct {
+	floatPrecision      int
+	lowerFrequencyBound int
+	sampleRate          int
+	upperFrequencyBound int
+}
+
+func Preprocess(rawSignals []byte, p Params) ([]byte, error) {
 	log.Println("preprocess")
 
 	log.Println("exec command: poetry run python3 preprocess.py")
@@ -47,10 +54,10 @@ func preprocess(rawSignals []byte, p preprocessParams) ([]byte, error) {
 	return output, nil
 }
 
-func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
+func ParsePreprocessParams(r *http.Request) (Params, error) {
 	log.Println("parse preprocess params")
 
-	var params = preprocessParams{}
+	var params = Params{}
 
 	log.Println("parse form")
 	err := r.ParseForm()
@@ -60,20 +67,25 @@ func parsePreprocessParams(r *http.Request) (preprocessParams, error) {
 		return params, err
 	}
 
-	parseParam(&params.floatPrecision, r, "floatPrecision")
-	parseParam(&params.lowerFrequencyBound, r, "lowerFrequencyBound")
-	parseParam(&params.sampleRate, r, "sampleRate")
-	parseParam(&params.upperFrequencyBound, r, "upperFrequencyBound")
+	params.floatPrecision, err = strconv.Atoi(r.Form.Get("floatPrecision"))
+	if err != nil {
+		return params, err
+	}
+
+	params.lowerFrequencyBound, err = strconv.Atoi(r.Form.Get("lowerFrequencyBound"))
+	if err != nil {
+		return params, err
+	}
+
+	params.sampleRate, err = strconv.Atoi(r.Form.Get("sampleRate"))
+	if err != nil {
+		return params, err
+	}
+
+	params.upperFrequencyBound, err = strconv.Atoi(r.Form.Get("upperFrequencyBound"))
+	if err != nil {
+		return params, err
+	}
 
 	return params, nil
-}
-
-func parseParam(p *int, r *http.Request, key string) {
-	log.Println("parse param", key)
-
-	if param, err := strconv.Atoi(r.Form.Get(key)); err == nil {
-		*p = param
-	} else {
-		log.Println(err)
-	}
 }
