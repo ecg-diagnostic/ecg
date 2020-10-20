@@ -1,5 +1,5 @@
 # Проверь свое сердце
-*Приложение для предсказания заболеваний по электрокардиограмме*
+*Приложение для предсказания заболеваний по электрокардиограмме*.
 
 ![Docker Images CI](https://github.com/ecg-diagnostic/ecg/workflows/Docker%20Images%20CI/badge.svg?branch=master)
 ![Unit Tests](https://github.com/ecg-diagnostic/ecg/workflows/Unit%20Tests/badge.svg?branch=master)
