@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/ecg-diagnostic/ecg/back/environment"
+	"github.com/ecg-diagnostic/ecg/back/preprocess"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"io"
@@ -35,12 +37,7 @@ type Store struct {
 	tokenToEntry map[Token]Entry
 }
 
-type preprocessParams struct {
-	floatPrecision      int
-	lowerFrequencyBound int
-	sampleRate          int
-	upperFrequencyBound int
-}
+
 
 type TokenResponse struct {
 	Token Token `json:"token"`
@@ -66,14 +63,14 @@ func main() {
 	router.Path("/api/{token}").Methods(http.MethodGet).HandlerFunc(handleGet)
 	router.Path("/api/{token}/predictions").Methods(http.MethodGet).HandlerFunc(handlePredictions)
 
-	var backAddr, listenAddr = GetBackAddr()
+	var backAddr, listenAddr = environment.GetBackAddr()
 	log.Println("backend listening", backAddr)
 	err := http.ListenAndServe(listenAddr, router)
 	log.Fatal(err)
 }
 
 func toConverter(multipartBody *bytes.Buffer, multipartWriter *multipart.Writer) (int, error, []byte) {
-	converterAddr, _ := GetConverterAddr()
+	converterAddr, _ := environment.GetConverterAddr()
 	contentType := multipartWriter.FormDataContentType()
 
 	response, err := http.Post(converterAddr, contentType, multipartBody)
@@ -191,7 +188,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	preprocessParams, err := parsePreprocessParams(r)
+	preprocessParams, err := preprocess.ParsePreprocessParams(r)
 
 	if err != nil {
 		var err = fmt.Errorf("parse preprocess params: %w", err)
@@ -200,7 +197,7 @@ func handleGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signals, err := preprocess(entry.Signals, preprocessParams)
+	signals, err := preprocess.Preprocess(entry.Signals, preprocessParams)
 
 	if err != nil {
 		var err = fmt.Errorf("preprocess: %w", err)
@@ -301,7 +298,7 @@ func handlePredictions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var modelAddr, _ = GetModelAddr()
+	var modelAddr, _ = environment.GetModelAddr()
 	modelAddr = fmt.Sprintf("%s/predict", modelAddr)
 	var contentType = "application/octet-stream"
 	var modelRequestBody = bytes.NewBuffer(entry.Signals)
